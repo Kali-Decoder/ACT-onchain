@@ -131,6 +131,20 @@ export function useIsOwner() {
     return { isOwner, owner, isLoading };
 }
 
+export function useHasJoined(poolId: number) {
+    const { address } = useAccount();
+
+    const { data: joined, isLoading } = useReadContract({
+        ...cricketContract,
+        functionName: "hasJoined",
+        args: [poolId, address],
+    });
+
+    const hasJoined = !!joined;
+
+    return { hasJoined, isLoading };
+}
+
 
 export function useCreatePool() {
     const {
@@ -188,32 +202,27 @@ export function useCreatePool() {
 
 
 export function useJoinPool() {
-    const { data: hash, writeContractAsync } = useWriteContract();
-    const { isLoading: isConfirming, isSuccess, isError } = useWaitForTransactionReceipt({ hash });
-    const [isPending, setIsPending] = useState(false);
+    const { data: hash, writeContract, isPending, error } = useWriteContract();
+    const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({ hash });
 
-    async function joinPool(poolId: number, optionIndex: number) {
-        try {
-            setIsPending(true);
-            await writeContractAsync({
-                ...cricketContract,
-                functionName: "joinPool",
-                args: [BigInt(poolId), optionIndex],
-            });
-        } finally {
-            setIsPending(false);
-        }
-    }
+
+    const joinPool = (poolId: number, optionIndex: number,entryFee:number) =>
+        writeContract({
+            ...cricketContract,
+            functionName: "joinPool",
+            args: [BigInt(poolId), optionIndex],
+            value:entryFee
+        });
 
     return {
         joinPool,
         isPending,
         isConfirming,
         isSuccess,
-        isError,
+        hash,
+        error,
     };
 }
-
 
 
 export function useResolvePool() {

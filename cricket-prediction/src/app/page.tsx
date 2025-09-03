@@ -86,18 +86,23 @@ export default function Home() {
                       className="bg-gray-900 border border-gray-700 rounded-2xl p-6 shadow hover:shadow-lg cursor-pointer transition-all"
                     >
                       {/* Logo + Name */}
-                      <div className="flex items-center gap-2 mb-4">
-                        <div className="w-12 h-12 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center text-white font-bold text-lg">
+                      <div className="flex items-start gap-3 mb-4">
+                        {/* Pool ID / Avatar */}
+                        <div className="w-10 h-10 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center text-white font-bold text-sm">
                           {pool?.id || "P"}
                         </div>
-                        <h2 className="text-md font-semibold uppercase text-white">
-                          {pool?.name}
-                        </h2>
+
+                        {/* Name + Description */}
+                        <div className="flex flex-col">
+                          <h2 className="text-md font-semibold uppercase text-white flex items-center gap-2">
+                            {pool?.name}
+                            {Number(pool?.lockTime) < Math.floor(Date.now() / 1000) && (
+                              <span className="text-red-500 text-sm font-normal">Ended</span>
+                            )}
+                          </h2>
+                          <p className="text-gray-400 text-xs mt-1">{pool?.desc}</p>
+                        </div>
                       </div>
-
-                      {/* Description */}
-                      <p className="text-gray-400 text-sm mb-4">{pool?.description}</p>
-
                       {/* Options */}
                       {pool?.options?.length > 0 && (
                         <div className="mb-6">
