@@ -4,11 +4,12 @@ import ConnectButton from "@/providers/wallet-connect";
 import Link from "next/link";
 import React from "react";
 import { useAccount, useBalance } from "wagmi";
-// import CreatePoolModal from "./CreatePoolModal";
+import CreatePoolModal from "./CreatePoolModal";
 import deployments from "../../../onchain-contracts/deployments/CricketPredictionPools.json";
+import { useIsOwner } from "@/hooks/useCricketPools";
 const Navbar = () => {
   const [showCreatePoolModal, setShowCreatePoolModal] = React.useState(false);
-  // const { isOwner,withdrawlContractBalance } = useDataContext();
+  const { isOwner, isLoading } = useIsOwner();
   const { address } = useAccount();
   const { data: balanceData } = useBalance({
     address: deployments.address,
@@ -28,7 +29,7 @@ const Navbar = () => {
             </span>
           </Link>
           <div className="flex md:order-2 space-x-3 md:space-x-0 rtl:space-x-reverse">
-            {/* {address && isOwner && (
+            {address && isOwner && (
               <>
                 <button
                   onClick={() => setShowCreatePoolModal(true)}
@@ -38,15 +39,15 @@ const Navbar = () => {
                 </button>
 
                 <button
-                  onClick={async()=>{
-                    await withdrawlContractBalance();
-                  }}
+                  // onClick={async()=>{
+                  //   await withdrawlContractBalance();
+                  // }}
                   className="retro rbtn-small text-sm mr-4 mb-10"
                 >
                  Contract Balance {"💰 " + balanceData?.formatted + balanceData?.symbol}
                 </button>
               </>
-            )} */}
+            )}
             {address && (
               <button className="retro rbtn-small text-sm mr-4 mb-10">
                 🟢 {address.slice(0, 6) + "..." + address.slice(-4)}
@@ -84,9 +85,9 @@ const Navbar = () => {
           ></div>
         </div>
       </nav>
-      {/* {showCreatePoolModal && (
+      {showCreatePoolModal && (
         <CreatePoolModal setShowCreatePoolModal={setShowCreatePoolModal} />
-      )} */}
+      )}
     </>
   );
 };

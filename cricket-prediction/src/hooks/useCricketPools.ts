@@ -1,16 +1,16 @@
 "use client";
-import { useAccount, useReadContract, useReadContracts, useWriteContract } from "wagmi";
+import { useAccount, useReadContract, useReadContracts, useWriteContract, useWaitForTransactionReceipt } from "wagmi";
 import { useMutation } from "@tanstack/react-query";
-import { Address } from "viem";
+import { Address, parseEther, zeroAddress } from "viem";
 import deployments from "../../../onchain-contracts/deployments/CricketPredictionPools.json"
+import { useState } from "react";
 
 export const cricketContract = {
     address: deployments.address as Address,
     abi: deployments.abi,
 };
-
 export function usePools() {
-    // get total pool count
+    // 1. get total pool count
     const { data: nextPoolId, isLoading: isLoadingCount } = useReadContract({
         ...cricketContract,
         functionName: "nextPoolId",
@@ -20,35 +20,67 @@ export function usePools() {
         ? Array.from({ length: Number(nextPoolId) - 1 }, (_, i) => i + 1)
         : [];
 
-    // fetch pools in one batch using getPool
-    const { data, isLoading, error } = useReadContracts({
+    // 2. fetch pools from mapping pools(i)
+    const {
+        data: poolsData,
+        isLoading: isLoadingPools,
+        error,
+    } = useReadContracts({
         contracts: poolIds.map((id) => ({
             ...cricketContract,
-            functionName: "getPool",
+            functionName: "pools",
             args: [BigInt(id)],
         })),
-        query: { enabled: poolIds.length > 0 },
+        query: {
+            enabled: poolIds.length > 0,
+            staleTime: 30_000, // 30s caching
+            refetchOnWindowFocus: false,
+            refetchOnReconnect: false,
+        },
     });
 
-    // restructure: map tuple into named fields
+    // 3. fetch options for each pool
+    const { data: optionsData, isLoading: isLoadingOptions } = useReadContracts({
+        contracts: poolIds.map((id) => ({
+            ...cricketContract,
+            functionName: "getOptions",
+            args: [BigInt(id)],
+        })),
+        query: {
+            enabled: poolIds.length > 0,
+            staleTime: 30_000,
+            refetchOnWindowFocus: false,
+            refetchOnReconnect: false,
+        },
+    });
+
+    // 4. restructure pool info
     const pools =
-        data && poolIds.length > 0
+        poolsData && optionsData
             ? poolIds.map((id, idx) => {
-                const poolData = data[idx]?.result;
+                const poolData = poolsData[idx]?.result;
+                const poolOptions = optionsData[idx]?.result || [];
+
                 if (!poolData) return null;
 
                 return {
                     id,
-                    name: poolData[0],
-                    description: poolData[1],
-                    token: poolData[2],
-                    entryFee: poolData[3],
-                    startTime: poolData[4],
-                    lockTime: poolData[5],
+                    startTime: Number(poolData[0]),
+                    lockTime: Number(poolData[1]),
+                    resolved: poolData[2],
+                    canceled: poolData[3],
+                    token: poolData[4],
+                    entryFee: poolData[5],
                     platformFeeBps: poolData[6],
-                    options: poolData[7],
-                    resolved: poolData[8],
-                    winnersCount: poolData[9],
+                    totalPot: poolData[7],
+                    platformFee: poolData[8],
+                    netPot: poolData[9],
+                    name: poolData[10],
+                    desc: poolData[11],
+                    options: poolOptions,
+                    winningOption: poolData[12],
+                    totalEntries: poolData[13],
+                    winnersCount: poolData[14],
                 };
             }).filter(Boolean)
             : [];
@@ -56,7 +88,7 @@ export function usePools() {
     return {
         pools,
         nextPoolId,
-        isLoading: isLoadingCount || isLoading,
+        isLoading: isLoadingCount || isLoadingPools || isLoadingOptions,
         error,
     };
 }
@@ -79,4 +111,195 @@ export function usePool(poolId?: number) {
     });
 
     return { pool, options };
+}
+
+
+export function useIsOwner() {
+    const { address } = useAccount();
+
+    // Read owner from contract
+    const { data: owner, isLoading } = useReadContract({
+        ...cricketContract,
+        functionName: "owner",
+    });
+
+    const isOwner =
+        !!address &&
+        !!owner &&
+        address.toLowerCase() === (owner as string).toLowerCase();
+
+    return { isOwner, owner, isLoading };
+}
+
+
+export function useCreatePool() {
+    const {
+        data: hash,
+        writeContract,
+        isPending,
+        error,
+    } = useWriteContract();
+
+    const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
+        hash,
+    });
+
+    const createPool = ({
+        name,
+        description,
+        entryFee,
+        startTime,
+        lockTime,
+        maxParticipants,
+        options,
+    }: {
+        name: string;
+        description: string;
+        entryFee: string; // "0.1"
+        startTime: number;
+        lockTime: number;
+        maxParticipants: number;
+        options: string[];
+    }) =>
+        writeContract({
+            ...cricketContract,
+            functionName: "createPool",
+            args: [
+                name,
+                description,
+                zeroAddress, // native token
+                parseEther(entryFee),
+                BigInt(startTime),
+                BigInt(lockTime),
+                BigInt(maxParticipants),
+                options,
+            ],
+        });
+
+    return {
+        createPool,
+        isPending,
+        isConfirming,
+        isSuccess,
+        hash,
+        error,
+    };
+}
+
+
+export function useJoinPool() {
+    const { data: hash, writeContractAsync } = useWriteContract();
+    const { isLoading: isConfirming, isSuccess, isError } = useWaitForTransactionReceipt({ hash });
+    const [isPending, setIsPending] = useState(false);
+
+    async function joinPool(poolId: number, optionIndex: number) {
+        try {
+            setIsPending(true);
+            await writeContractAsync({
+                ...cricketContract,
+                functionName: "joinPool",
+                args: [BigInt(poolId), optionIndex],
+            });
+        } finally {
+            setIsPending(false);
+        }
+    }
+
+    return {
+        joinPool,
+        isPending,
+        isConfirming,
+        isSuccess,
+        isError,
+    };
+}
+
+
+
+export function useResolvePool() {
+    const { data: hash, writeContractAsync } = useWriteContract();
+    const { isLoading: isConfirming, isSuccess, isError } =
+        useWaitForTransactionReceipt({ hash });
+
+    const [isPending, setIsPending] = useState(false);
+
+    async function resolvePool(poolId: number, winningOption: number) {
+        try {
+            setIsPending(true);
+            await writeContractAsync({
+                ...cricketContract,
+                functionName: "resolvePool",
+                args: [BigInt(poolId), winningOption],
+            });
+        } finally {
+            setIsPending(false);
+        }
+    }
+
+    return {
+        resolvePool,
+        isPending,
+        isConfirming,
+        isSuccess,
+        isError,
+    };
+}
+
+
+export function useClaim() {
+    const { data: hash, writeContractAsync } = useWriteContract();
+    const { isLoading: isConfirming, isSuccess, isError } =
+        useWaitForTransactionReceipt({ hash });
+
+    const [isPending, setIsPending] = useState(false);
+
+    async function claim(poolId: number) {
+        try {
+            setIsPending(true);
+            await writeContractAsync({
+                ...cricketContract,
+                functionName: "claim",
+                args: [BigInt(poolId)],
+            });
+        } finally {
+            setIsPending(false);
+        }
+    }
+
+    return {
+        claim,
+        isPending,
+        isConfirming,
+        isSuccess,
+        isError,
+    };
+}
+
+export function useCancelPool() {
+    const { data: hash, writeContractAsync } = useWriteContract();
+    const { isLoading: isConfirming, isSuccess, isError } =
+        useWaitForTransactionReceipt({ hash });
+
+    const [isPending, setIsPending] = useState(false);
+
+    async function cancelPool(poolId: number) {
+        try {
+            setIsPending(true);
+            await writeContractAsync({
+                ...cricketContract,
+                functionName: "cancelPool",
+                args: [BigInt(poolId)],
+            });
+        } finally {
+            setIsPending(false);
+        }
+    }
+
+    return {
+        cancelPool,
+        isPending,
+        isConfirming,
+        isSuccess,
+        isError,
+    };
 }

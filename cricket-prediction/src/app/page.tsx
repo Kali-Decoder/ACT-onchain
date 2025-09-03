@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useState, useMemo } from "react";
 import PoolModal from "@/component/PoolModal";
 import Navbar from "@/component/Navbar";
 import { PageTransition } from "@/component/PageTransition";
@@ -7,68 +7,63 @@ import { usePools } from "@/hooks/useCricketPools";
 
 export default function Home() {
   const [showModal, setShowModal] = useState(false);
-  const [selectPoolId, setSelectPoolId] = useState(0);
+  const [selectPoolId, setSelectPoolId] = useState<number | null>(null);
   const { pools, isLoading } = usePools();
-  const [filteredPools, setFilteredPools] = useState([]);
+  const [status, setStatus] = useState<"all" | "ongoing" | "ended">("all");
 
-  // 🔹 Sync filteredPools with pools by default
-  useEffect(() => {
-    if (pools?.length > 0) {
-      setFilteredPools(pools);
-    }
-  }, [pools]);
+  // derive filtered pools
+  const filteredPools = useMemo(() => {
+    if (!pools?.length) return [];
+    if (status === "all") return pools;
 
-  const filterPools = (status: "all" | "ongoing" | "ended") => {
-    if (status === "all") {
-      setFilteredPools(pools);
-      return;
-    }
-
-    const now = Math.floor(Date.now() / 1000); // current time in seconds
-
-    const filtered = pools.filter((pool) => {
+    const now = Math.floor(Date.now() / 1000);
+    return pools.filter((pool) => {
       const isEnded = Number(pool.lockTime) < now;
       if (status === "ongoing") return !isEnded;
       if (status === "ended") return isEnded;
       return true;
     });
-
-    setFilteredPools(filtered);
-  };
+  }, [pools, status]);
 
   return (
     <>
       <PageTransition>
         <Navbar />
-        <div className=" w-[80%] mt-28 flex-col mx-auto bg-[#000618] ">
+        <div className="w-[80%] mt-28 flex-col mx-auto bg-[#000618] ">
           <header>
             <h1 className="uppercase mb-4">
               {isLoading ? "Loading Pools ..." : "Cricket Mania Pools"}
             </h1>
           </header>
+
+          {/* Filter buttons */}
           <div className="flex">
             <div className="flex items-center">
               <button
-                onClick={() => filterPools("all")}
-                className="retro rbtn-small text-xs mr-4 focus:bg-purple-500 active:bg-blue-500 "
+                onClick={() => setStatus("all")}
+                className={`retro rbtn-small text-xs mr-4 ${status === "all" ? "bg-purple-500" : ""
+                  }`}
               >
                 All
               </button>
               <button
-                onClick={() => filterPools("ongoing")}
-                className="retro rbtn-small text-xs mr-4 focus:bg-purple-500"
+                onClick={() => setStatus("ongoing")}
+                className={`retro rbtn-small text-xs mr-4 ${status === "ongoing" ? "bg-purple-500" : ""
+                  }`}
               >
                 On Going Pools
               </button>
               <button
-                onClick={() => filterPools("ended")}
-                className="retro rbtn-small text-xs mr-4 focus:bg-purple-500"
+                onClick={() => setStatus("ended")}
+                className={`retro rbtn-small text-xs mr-4 ${status === "ended" ? "bg-purple-500" : ""
+                  }`}
               >
                 Ended Pools
               </button>
             </div>
           </div>
 
+          {/* Pool cards */}
           <main className="mt-8">
             <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredPools.length === 0 && !isLoading && (
@@ -77,7 +72,9 @@ export default function Home() {
 
               {filteredPools.length > 0 &&
                 filteredPools.map((pool) => {
-                  const poolEnded = Number(pool?.lockTime) < Math.floor(Date.now() / 1000);
+                  const entryFee = Number(pool?.entryFee) / 1e18;
+                  const totalPot = Number(pool?.totalPot) / 1e18;
+                  const progress = Math.min((totalPot / 100) * 100, 100); // clamp max at 100%
 
                   return (
                     <div
@@ -93,7 +90,9 @@ export default function Home() {
                         <div className="w-12 h-12 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center text-white font-bold text-lg">
                           {pool?.id || "P"}
                         </div>
-                        <h2 className="text-md font-semibold uppercase text-white">{pool?.name}</h2>
+                        <h2 className="text-md font-semibold uppercase text-white">
+                          {pool?.name}
+                        </h2>
                       </div>
 
                       {/* Description */}
@@ -102,14 +101,21 @@ export default function Home() {
                       {/* Options */}
                       {pool?.options?.length > 0 && (
                         <div className="mb-6">
-                          <h3 className="text-xs font-semibold text-gray-300 mb-2">Options:</h3>
+                          <h3 className="text-xs font-semibold text-gray-300 mb-2">
+                            Options:
+                          </h3>
                           <div className="flex flex-wrap gap-2">
                             {pool.options.map((opt, idx) => (
                               <button
                                 key={idx}
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  console.log("Selected option:", opt, "in Pool:", pool.id);
+                                  console.log(
+                                    "Selected option:",
+                                    opt,
+                                    "in Pool:",
+                                    pool.id
+                                  );
                                 }}
                                 className="px-3 py-1 text-xs bg-gray-700 hover:bg-gray-600 rounded-md text-gray-200"
                               >
@@ -121,28 +127,44 @@ export default function Home() {
                       )}
 
                       {/* Entry Fee */}
-                      <div className="border-t border-gray-700 pt-4 flex justify-between items-center">
-                        <span className="text-gray-400 text-xs">Starting Bet</span>
-                        <span className="text-blue-400 text-xs font-medium">
-                          {Number(pool?.entryFee) / 1e18} MON
-                        </span>
+                      <div className="border-t border-gray-700 pt-4">
+                        <div className="flex justify-between items-center mb-2">
+                          <span className="text-gray-400 text-xs">Starting Bet</span>
+                          <span className="text-blue-400 text-xs font-medium">
+                            {entryFee} MON
+                          </span>
+                        </div>
+
+                        {/* Total Pot Progress */}
+                        <div className="flex justify-between items-center mb-1 mt-4">
+                          <span className="text-gray-400 text-xs">Total Pot</span>
+                          <span className="text-green-400 text-xs font-medium">
+                            {totalPot} / 100 MON
+                          </span>
+                        </div>
+                        <div className="w-full h-2 bg-gray-700 rounded-full overflow-hidden">
+                          <div
+                            className="h-2 bg-gradient-to-r from-green-400 to-green-600 rounded-full"
+                            style={{ width: `${progress}%` }}
+                          ></div>
+                        </div>
                       </div>
                     </div>
                   );
                 })}
             </section>
           </main>
+
         </div>
-        {showModal && (
+
+        {/* Modal */}
+        {showModal && selectPoolId && (
           <PoolModal
             setShowModal={setShowModal}
             pool={pools.find((p) => p.id === selectPoolId)}
           />
         )}
-
       </PageTransition>
     </>
   );
 }
-
-
