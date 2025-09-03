@@ -158,6 +158,7 @@ contract CricketPredictionPools is Ownable, Pausable, ReentrancyGuard {
         p.entryFee = entryFee;
         p.platformFeeBps = platformFeeBps;
         p.name = name;
+        p.desc=desc;
 
         // copy options into storage
         for (uint256 i = 0; i < options.length; i++) {

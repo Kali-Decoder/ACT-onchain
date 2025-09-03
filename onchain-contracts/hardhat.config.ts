@@ -1,12 +1,11 @@
 import "dotenv/config";
 import "@nomicfoundation/hardhat-toolbox";
 import "@nomicfoundation/hardhat-verify";
-const MONAD_RPC_URL = "http://testnet-rpc.monad.xyz/";
+const MONAD_RPC_URL = "https://testnet-rpc.monad.xyz";
 
 const ACCOUNTS = process.env.DEPLOYER_ACCOUNT_PRIV_KEY
   ? [`${process.env.DEPLOYER_ACCOUNT_PRIV_KEY}`]
   : [];
-
 module.exports = {
   defaultNetwork: "hardhat",
   gasReporter: {
