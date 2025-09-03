@@ -1,9 +1,8 @@
 import { ethers } from "hardhat";
-
+import deployments  from "../deployments/CricketPredictionPools.json";
 async function createPool() {
   const PoolContract = "CricketPredictionPools";
-  const CricketPredictionPoolsAddress =
-    "0xf62F3506F0fA02be05Bb9E0DfE1b8FFBBF3362e8";
+  const CricketPredictionPoolsAddress = deployments.address;
 
   // signer
   const sender = new ethers.Wallet(
@@ -30,14 +29,14 @@ async function createPool() {
   const maxParticipants = 500;
 
   const tx = await contract.createPool(
-    "wHO WILL WIN THIS TOURNAMENT",             // match name
+    "Who will score most runs",             // match name
     "Athena Cricket Tournament",        // description
     ethers.ZeroAddress,       // token (native ETH)
     entryFee,                 // entry fee
     startTime,                // start time
     lockTime,                 // lock time
     maxParticipants,          // max participants
-    ["IND", "AUS","PAK"]            // options
+    ["Nikku", "Harsh","Brooklyn"]            // options
   );
 
   console.log("⏳ Tx sent:", tx.hash);

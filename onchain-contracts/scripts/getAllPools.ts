@@ -1,11 +1,9 @@
 import { ethers } from "hardhat";
-
+import deployments from "../deployments/CricketPredictionPools.json";
 async function getAllPools() {
   const PoolContract = "CricketPredictionPools";
-  const CricketPredictionPoolsAddress =
-    "0xf62F3506F0fA02be05Bb9E0DfE1b8FFBBF3362e8";
+  const CricketPredictionPoolsAddress = deployments.address;
   const [signer] = await ethers.getSigners();
-
   const contract = await ethers.getContractAt(
     PoolContract,
     CricketPredictionPoolsAddress,
@@ -18,20 +16,22 @@ async function getAllPools() {
   console.log(`📌 Total Pools: ${totalPools}`);
 
   for (let i = 1; i <= totalPools; i++) {
-    const pool = await contract.pools(i);
-    const options = await contract.getOptions(i);
+    const pool = await contract.getPool(i); // this already includes options
+    // pool is Result(10) like you logged
 
     console.log(`\n===== Pool #${i} =====`);
-    console.log("Match Name:", pool.name);
-    console.log("Description:", pool.desc);
-    console.log("Entry Fee:", ethers.formatEther(pool.entryFee), "ETH");
-    console.log("Start Time:", new Date(Number(pool.startTime) * 1000).toISOString());
-    console.log("Lock Time:", new Date(Number(pool.lockTime) * 1000).toISOString());
-    console.log("Entries:", pool.totalEntries.toString());
-    console.log("Options:", options);
-    console.log("Resolved:", pool.resolved);
-    console.log("Winning Option:", pool.winnersCount);
+    console.log("Match Name:", pool[0]); // name
+    console.log("Description:", pool[1]); // desc
+    console.log("Token Address:", pool[2]);
+    console.log("Entry Fee:", ethers.formatEther(pool[3]), "ETH");
+    console.log("Start Time:", new Date(Number(pool[4]) * 1000).toISOString());
+    console.log("Lock Time:", new Date(Number(pool[5]) * 1000).toISOString());
+    console.log("Platform Fee (bps):", pool[6].toString());
+    console.log("Options:", pool[7]); // already array
+    console.log("Resolved:", pool[8]);
+    console.log("Winners Count:", pool[9].toString());
   }
+
 }
 
 async function main() {

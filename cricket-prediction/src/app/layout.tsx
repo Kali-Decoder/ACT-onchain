@@ -1,10 +1,6 @@
 "use client";
-
 import "./globals.css";
-import Providers from "@/providers/Providers";
-import "@rainbow-me/rainbowkit/styles.css";
-import { Toaster } from "react-hot-toast";
-
+import AppKitProvider from '@/providers/client-providers'
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -13,8 +9,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-          <Providers>{children}</Providers>
-          <Toaster position="bottom-left" />
+        <AppKitProvider>
+          {children}
+        
+        </AppKitProvider>
       </body>
     </html>
   );

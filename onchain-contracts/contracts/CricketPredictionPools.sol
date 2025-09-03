@@ -313,6 +313,38 @@ contract CricketPredictionPools is Ownable, Pausable, ReentrancyGuard {
         return pools[poolId].options;
     }
 
+    function getPool(uint256 poolId)
+    external
+    view
+    returns (
+        string memory name,
+        string memory desc,
+        address token,
+        uint256 entryFee,
+        uint64 startTime,
+        uint64 lockTime,
+        uint16 platformFeeBps,
+        string[] memory options,
+        bool resolved,
+        uint256 winningOption
+    )
+{
+    PoolInfo storage p = pools[poolId];
+    return (
+        p.name,
+        p.desc,
+        p.token,
+        p.entryFee,
+        p.startTime,
+        p.lockTime,
+        p.platformFeeBps,
+        p.options,
+        p.resolved,
+        p.winningOption
+    );
+}
+
+
     function playerInfo(uint256 poolId, address player) external view returns (
         bool _hasJoined,
         uint8 _pick,

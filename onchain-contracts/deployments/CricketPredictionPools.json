@@ -1,6 +1,6 @@
 {
   "contractName": "CricketPredictionPools",
-  "address": "0xf62F3506F0fA02be05Bb9E0DfE1b8FFBBF3362e8",
+  "address": "0x7f8147725F5F9827e241d1a91319c228EA317E8A",
   "deployer": "0xe4b286830F35C3C4342952A62372A00b29E7F5EE",
   "abi": [
     {
@@ -429,6 +429,70 @@
           "internalType": "string[]",
           "name": "",
           "type": "string[]"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "poolId",
+          "type": "uint256"
+        }
+      ],
+      "name": "getPool",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "internalType": "string",
+          "name": "desc",
+          "type": "string"
+        },
+        {
+          "internalType": "address",
+          "name": "token",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "entryFee",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint64",
+          "name": "startTime",
+          "type": "uint64"
+        },
+        {
+          "internalType": "uint64",
+          "name": "lockTime",
+          "type": "uint64"
+        },
+        {
+          "internalType": "uint16",
+          "name": "platformFeeBps",
+          "type": "uint16"
+        },
+        {
+          "internalType": "string[]",
+          "name": "options",
+          "type": "string[]"
+        },
+        {
+          "internalType": "bool",
+          "name": "resolved",
+          "type": "bool"
+        },
+        {
+          "internalType": "uint256",
+          "name": "winningOption",
+          "type": "uint256"
         }
       ],
       "stateMutability": "view",
