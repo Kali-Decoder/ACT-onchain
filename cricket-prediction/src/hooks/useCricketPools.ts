@@ -10,98 +10,98 @@ export const cricketContract = {
     abi: deployments.abi,
 };
 export function usePools() {
-  // 1. get total pool count
-  const { data: nextPoolId, isLoading: isLoadingCount, refetch: refetchCount } = useReadContract({
-    ...cricketContract,
-    functionName: "nextPoolId",
-  });
+    // 1. get total pool count
+    const { data: nextPoolId, isLoading: isLoadingCount, refetch: refetchCount } = useReadContract({
+        ...cricketContract,
+        functionName: "nextPoolId",
+    });
 
-  const poolIds = nextPoolId
-    ? Array.from({ length: Number(nextPoolId) - 1 }, (_, i) => i + 1)
-    : [];
+    const poolIds = nextPoolId
+        ? Array.from({ length: Number(nextPoolId) - 1 }, (_, i) => i + 1)
+        : [];
 
-  // 2. fetch pools from mapping pools(i)
-  const {
-    data: poolsData,
-    isLoading: isLoadingPools,
-    error,
-    refetch: refetchPoolsData,
-  } = useReadContracts({
-    contracts: poolIds.map((id) => ({
-      ...cricketContract,
-      functionName: "pools",
-      args: [BigInt(id)],
-    })),
-    query: {
-      enabled: poolIds.length > 0,
-      staleTime: 30_000, // 30s caching
-      refetchOnWindowFocus: false,
-      refetchOnReconnect: false,
-    },
-  });
+    // 2. fetch pools from mapping pools(i)
+    const {
+        data: poolsData,
+        isLoading: isLoadingPools,
+        error,
+        refetch: refetchPoolsData,
+    } = useReadContracts({
+        contracts: poolIds.map((id) => ({
+            ...cricketContract,
+            functionName: "pools",
+            args: [BigInt(id)],
+        })),
+        query: {
+            enabled: poolIds.length > 0,
+            staleTime: 30_000, // 30s caching
+            refetchOnWindowFocus: false,
+            refetchOnReconnect: false,
+        },
+    });
 
-  // 3. fetch options for each pool
-  const { data: optionsData, isLoading: isLoadingOptions, refetch: refetchOptionsData } = useReadContracts({
-    contracts: poolIds.map((id) => ({
-      ...cricketContract,
-      functionName: "getOptions",
-      args: [BigInt(id)],
-    })),
-    query: {
-      enabled: poolIds.length > 0,
-      staleTime: 30_000,
-      refetchOnWindowFocus: false,
-      refetchOnReconnect: false,
-    },
-  });
+    // 3. fetch options for each pool
+    const { data: optionsData, isLoading: isLoadingOptions, refetch: refetchOptionsData } = useReadContracts({
+        contracts: poolIds.map((id) => ({
+            ...cricketContract,
+            functionName: "getOptions",
+            args: [BigInt(id)],
+        })),
+        query: {
+            enabled: poolIds.length > 0,
+            staleTime: 30_000,
+            refetchOnWindowFocus: false,
+            refetchOnReconnect: false,
+        },
+    });
 
-  // 4. restructure pool info
-  const pools =
-    poolsData && optionsData
-      ? poolIds
-          .map((id, idx) => {
-            const poolData = poolsData[idx]?.result;
-            const poolOptions = optionsData[idx]?.result || [];
+    // 4. restructure pool info
+    const pools =
+        poolsData && optionsData
+            ? poolIds
+                .map((id, idx) => {
+                    const poolData = poolsData[idx]?.result;
+                    const poolOptions = optionsData[idx]?.result || [];
 
-            if (!poolData) return null;
+                    if (!poolData) return null;
 
-            return {
-              id,
-              startTime: Number(poolData[0]),
-              lockTime: Number(poolData[1]),
-              resolved: poolData[2],
-              canceled: poolData[3],
-              token: poolData[4],
-              entryFee: poolData[5],
-              platformFeeBps: poolData[6],
-              totalPot: poolData[7],
-              platformFee: poolData[8],
-              netPot: poolData[9],
-              name: poolData[10],
-              desc: poolData[11],
-              options: poolOptions,
-              winningOption: poolData[12],
-              totalEntries: poolData[13],
-              winnersCount: poolData[14],
-            };
-          })
-          .filter(Boolean)
-      : [];
+                    return {
+                        id,
+                        startTime: Number(poolData[0]),
+                        lockTime: Number(poolData[1]),
+                        resolved: poolData[2],
+                        canceled: poolData[3],
+                        token: poolData[4],
+                        entryFee: poolData[5],
+                        platformFeeBps: poolData[6],
+                        totalPot: poolData[7],
+                        platformFee: poolData[8],
+                        netPot: poolData[9],
+                        name: poolData[10],
+                        desc: poolData[11],
+                        options: poolOptions,
+                        winningOption: poolData[12],
+                        totalEntries: poolData[13],
+                        winnersCount: poolData[14],
+                    };
+                })
+                .filter(Boolean)
+            : [];
 
-  // 5. Combine refetch functions
-  const refetchPools = async () => {
-    await refetchCount();
-    await refetchPoolsData();
-    await refetchOptionsData();
-  };
+    // 5. Combine refetch functions
+    const refetchPools = async () => {
+        await refetchCount();
+        await refetchPoolsData();
+        await refetchOptionsData();
+    };
 
-  return {
-    pools,
-    nextPoolId,
-    isLoading: isLoadingCount || isLoadingPools || isLoadingOptions,
-    error,
-    refetchPools,
-  };
+    return {
+        pools,
+        nextPoolId,
+        isLoading: isLoadingCount || isLoadingPools || isLoadingOptions,
+        error,
+        refetchPools,
+    };
 }
 
 
@@ -324,7 +324,7 @@ export function useCancelPool() {
     };
 }
 
-export function usePlayerInfo(poolId: number, player: string) {
+export function usePlayerInfo(poolId: number, player: `0x${string}`) {
     const { data, isLoading, error } = useReadContract({
         ...cricketContract,
         functionName: "playerInfo",
@@ -340,6 +340,23 @@ export function usePlayerInfo(poolId: number, player: string) {
 
     return {
         playerData,
+        isLoading,
+        error,
+    };
+}
+
+export function useOptionEntryCount(poolId: number, optionIndex: number) {
+    const { data, isLoading, error } = useReadContract({
+        ...cricketContract,
+        functionName: "optionEntryCount",
+        args: [BigInt(poolId), optionIndex],
+    });
+
+    // Convert returned BigInt to number
+    const count = data ? Number(data) : 0;
+
+    return {
+        count,
         isLoading,
         error,
     };

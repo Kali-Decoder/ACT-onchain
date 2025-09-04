@@ -4,6 +4,7 @@ import PoolModal from "@/component/PoolModal";
 import Navbar from "@/component/Navbar";
 import { PageTransition } from "@/component/PageTransition";
 import { usePools } from "@/hooks/useCricketPools";
+import { address } from "framer-motion/client";
 
 export default function Home() {
   const [showModal, setShowModal] = useState(false);
@@ -74,7 +75,7 @@ export default function Home() {
                 filteredPools.map((pool) => {
                   const entryFee = Number(pool?.entryFee) / 1e18;
                   const totalPot = Number(pool?.totalPot) / 1e18;
-                  const progress = Math.min((totalPot / 100) * 100, 100); // clamp max at 100%
+                  const progress = Math.min((totalPot / 100) * 100, 100);
 
                   return (
                     <div
@@ -161,6 +162,7 @@ export default function Home() {
           <PoolModal
             setShowModal={setShowModal}
             pool={pools.find((p) => p.id === selectPoolId)}
+            currentUser={address}
           />
         )}
       </PageTransition>

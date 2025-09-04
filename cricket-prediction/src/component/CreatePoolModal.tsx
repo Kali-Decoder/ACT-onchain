@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { toast } from "react-hot-toast";
-import { useCreatePool } from "@/hooks/useCricketPools";
+import { useCreatePool, usePools } from "@/hooks/useCricketPools";
 const CreatePoolModal = ({ setShowCreatePoolModal }) => {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
@@ -11,7 +11,7 @@ const CreatePoolModal = ({ setShowCreatePoolModal }) => {
   const [options, setOptions] = useState<string[]>([""]);
 
   const { createPool, isPending, isConfirming, isSuccess } = useCreatePool();
-
+  const { refetchPools } = usePools();
   const handleOptionChange = (index: number, value: string) => {
     const newOptions = [...options];
     newOptions[index] = value;
@@ -41,6 +41,7 @@ const CreatePoolModal = ({ setShowCreatePoolModal }) => {
       maxParticipants: Number(maxParticipants),
       options,
     });
+    refetchPools();
   };
 
   return (
