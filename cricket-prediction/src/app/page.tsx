@@ -29,8 +29,8 @@ export default function Home() {
   return (
     <>
       <PageTransition>
-      
-        <div className="w-[80%] mt-28 flex-col mx-auto bg-[#000618]  ">
+        <Navbar />
+        <div className="w-full sm:w-[90%] lg:w-[80%] mt-24 sm:mt-28 flex-col mx-auto bg-[#000618] px-4 sm:px-0">
           <header>
             <h1 className="uppercase mb-4">
               {isLoading ? "Loading Pools ..." : "Cricket Mania Pools"}
@@ -38,25 +38,25 @@ export default function Home() {
           </header>
 
           {/* Filter buttons */}
-          <div className="flex">
-            <div className="flex items-center">
+          <div className="flex flex-wrap gap-2 sm:gap-0">
+            <div className="flex flex-wrap items-center">
               <button
                 onClick={() => setStatus("all")}
-                className={`retro rbtn-small text-xs mr-4 ${status === "all" ? "bg-purple-500" : ""
+                className={`retro rbtn-small text-xs mr-2 sm:mr-4 ${status === "all" ? "bg-purple-500" : ""
                   }`}
               >
                 All
               </button>
               <button
                 onClick={() => setStatus("ongoing")}
-                className={`retro rbtn-small text-xs mr-4 ${status === "ongoing" ? "bg-purple-500" : ""
+                className={`retro rbtn-small text-xs mr-2 sm:mr-4 ${status === "ongoing" ? "bg-purple-500" : ""
                   }`}
               >
                 On Going Pools
               </button>
               <button
                 onClick={() => setStatus("ended")}
-                className={`retro rbtn-small text-xs mr-4 ${status === "ended" ? "bg-purple-500" : ""
+                className={`retro rbtn-small text-xs mr-2 sm:mr-4 ${status === "ended" ? "bg-purple-500" : ""
                   }`}
               >
                 Ended Pools
@@ -66,9 +66,9 @@ export default function Home() {
 
           {/* Pool cards */}
           <main className="mt-8">
-            <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
               {filteredPools.length === 0 && !isLoading && (
-                <h1 className="uppercase whitespace-nowrap">No Pools Available</h1>
+                <h1 className="uppercase">No Pools Available</h1>
               )}
 
               {filteredPools.length > 0 &&
@@ -89,7 +89,7 @@ export default function Home() {
                       {/* Logo + Name */}
                       <div className="flex items-start gap-3 mb-4">
                         {/* Pool ID / Avatar */}
-                        <div className="w-10 h-10 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center text-white font-bold text-sm">
+                        <div className="min-w-10 min-h-10 w-10 h-10 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center text-white font-bold text-sm">
                           {pool?.id || "P"}
                         </div>
 
@@ -101,7 +101,7 @@ export default function Home() {
                               <span className="text-red-500 text-sm font-normal">Ended</span>
                             )}
                           </h2>
-                          <p className="text-gray-400 text-xs mt-1">{pool?.desc}</p>
+                          <p className="text-gray-400 text-xs mt-1 line-clamp-2">{pool?.desc}</p>
                         </div>
                       </div>
 

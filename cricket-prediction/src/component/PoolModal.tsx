@@ -75,8 +75,8 @@ const PoolModal = ({ setShowModal, pool, currentUser }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black bg-opacity-70 flex items-center justify-center p-4">
-      <div className="bg-gray-900 text-white rounded-xl p-6 max-w-5xl w-full shadow-2xl relative">
+    <div className="fixed inset-0 z-50 bg-black bg-opacity-70 flex items-center justify-center p-0 sm:p-4">
+      <div className="bg-gray-900 text-white rounded-none sm:rounded-xl p-4 sm:p-6 w-screen h-screen sm:w-full sm:h-auto sm:max-w-5xl sm:max-h-[90vh] overflow-y-auto shadow-2xl relative">
         {/* Close Button */}
         <button
           onClick={() => setShowModal(false)}
@@ -86,15 +86,15 @@ const PoolModal = ({ setShowModal, pool, currentUser }) => {
         </button>
 
         {/* Title */}
-        <h2 className="text-xl font-bold mb-6">{pool?.name}</h2>
-        <p className="text-xs font-bold mb-6">{pool?.desc}</p>
+        <h2 className="text-lg sm:text-xl font-bold mb-3 sm:mb-6">{pool?.name}</h2>
+        <p className="text-xs font-bold mb-4 sm:mb-6">{pool?.desc}</p>
 
         {/* Main Grid */}
-        <div className="grid grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
           {/* Left Side: Pool & Player Info */}
           <div className="space-y-4">
             {/* Pool Details */}
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               {[
                 { label: "Pool ID", value: pool?.id },
                 { label: "Entry Fee", value: `${Number(pool?.entryFee) / 1e18} MON` },
@@ -117,7 +117,7 @@ const PoolModal = ({ setShowModal, pool, currentUser }) => {
                   className="bg-gray-800 p-3 rounded-xl flex flex-col justify-center items-start"
                 >
                   <span className="text-gray-400 text-xs">{item.label}</span>
-                  <span className="font-semibold text-white mt-1 text-xs">{item.value}</span>
+                  <span className="font-semibold text-white mt-1 text-xs break-words">{item.value}</span>
                 </div>
               ))}
             </div>
@@ -141,7 +141,7 @@ const PoolModal = ({ setShowModal, pool, currentUser }) => {
             {!poolEnded && !pool?.resolved && (
               <div className="mb-6">
                 <h3 className="text-sm font-semibold mb-2">Choose Your Option:</h3>
-                <div className="flex flex-wrap gap-3">
+                <div className="flex flex-wrap gap-2 sm:gap-3">
                   {pool?.options?.map((opt, idx) => (
                     <OptionButton
                       key={idx}
@@ -164,7 +164,7 @@ const PoolModal = ({ setShowModal, pool, currentUser }) => {
               <button
                 onClick={handleJoin}
                 disabled={poolEnded || selectedOption === null || isPending || isConfirming || hasJoined}
-                className={`retro rbtn-small whitespace-nowrap text-sm w-2/3 text-center ${poolEnded || selectedOption === null || isPending || isConfirming || hasJoined
+                className={`retro rbtn-small whitespace-nowrap text-xs sm:text-sm w-full sm:w-2/3 text-center ${poolEnded || selectedOption === null || isPending || isConfirming || hasJoined
                   ? "opacity-50 cursor-not-allowed"
                   : ""
                   }`}

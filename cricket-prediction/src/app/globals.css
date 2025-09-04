@@ -230,6 +230,11 @@ body {
   margin-top: 20px;
 }
 
+/* Utility to remove default .retro margin in compact places like navbar */
+.no-rt-mt {
+  margin-top: 0 !important;
+}
+
 .retro:hover {
   color: black;
   background: white;
