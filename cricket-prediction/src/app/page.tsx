@@ -4,14 +4,15 @@ import PoolModal from "@/component/PoolModal";
 import Navbar from "@/component/Navbar";
 import { PageTransition } from "@/component/PageTransition";
 import { usePools } from "@/hooks/useCricketPools";
-import { address } from "framer-motion/client";
+import { useAccount } from "wagmi";
+
 
 export default function Home() {
   const [showModal, setShowModal] = useState(false);
   const [selectPoolId, setSelectPoolId] = useState<number | null>(null);
   const { pools, isLoading } = usePools();
   const [status, setStatus] = useState<"all" | "ongoing" | "ended">("all");
-
+  const {address} = useAccount();
   // derive filtered pools
   const filteredPools = useMemo(() => {
     if (!pools?.length) return [];

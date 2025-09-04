@@ -12,11 +12,11 @@ pragma solidity ^0.8.24;
  *         - Supports both native ETH and ERC20 tokens (set token = address(0) for ETH)
  */
 
-import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
-import { Pausable } from "@openzeppelin/contracts/utils/Pausable.sol";
-import { ReentrancyGuard } from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
-import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+import {Pausable} from "@openzeppelin/contracts/utils/Pausable.sol";
+import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 contract CricketPredictionPools is Ownable, Pausable, ReentrancyGuard {
     using SafeERC20 for IERC20;
@@ -61,25 +61,22 @@ contract CricketPredictionPools is Ownable, Pausable, ReentrancyGuard {
     // ====== Storage ======
     struct PoolInfo {
         // lifecycle
-        uint64 startTime;   // when the pool is visible/joins allowed (informational)
-        uint64 lockTime;    // no more joins after this time
-        bool resolved;      // true once outcome is set
-        bool canceled;      // true if admin cancels; participants can refund
-
+        uint64 startTime; // when the pool is visible/joins allowed (informational)
+        uint64 lockTime; // no more joins after this time
+        bool resolved; // true once outcome is set
+        bool canceled; // true if admin cancels; participants can refund
         // economics
-        address token;      // address(0) for ETH
-        uint256 entryFee;   // fixed per wallet
+        address token; // address(0) for ETH
+        uint256 entryFee; // fixed per wallet
         uint16 platformFeeBps; // fee taken on resolution (0-10000)
-        uint256 totalPot;   // sum of all entries (entryFee * totalEntries)
+        uint256 totalPot; // sum of all entries (entryFee * totalEntries)
         uint256 platformFee; // computed and locked-in at resolve time
-        uint256 netPot;      // totalPot - platformFee
-
+        uint256 netPot; // totalPot - platformFee
         // metadata
-        string name;        // e.g., "IND vs AUS - Match Winner"
-        string desc;        // e.g., "IND vs AUS - Match Winner"
-        string[] options;   // e.g., ["IND", "AUS", "Draw"]
+        string name; // e.g., "IND vs AUS - Match Winner"
+        string desc; // e.g., "IND vs AUS - Match Winner"
+        string[] options; // e.g., ["IND", "AUS", "Draw"]
         uint8 winningOption; // index into options
-
         // accounting
         uint256 totalEntries; // total joined wallets
         uint256 winnersCount; // frozen on resolve (optionEntryCount[winning])
@@ -121,13 +118,17 @@ contract CricketPredictionPools is Ownable, Pausable, ReentrancyGuard {
         feeRecipient = _to;
     }
 
-    function pause() external onlyOwner { _pause(); }
-    function unpause() external onlyOwner { _unpause(); }
+    function pause() external onlyOwner {
+        _pause();
+    }
+
+    function unpause() external onlyOwner {
+        _unpause();
+    }
 
     /**
      * @notice Create a new prediction pool.
      * @param name A human-readable title
-        * @param desc A human-readable description
      * @param token Address of ERC20 to use; set address(0) for native ETH
      * @param entryFee Fixed entry price per wallet
      * @param startTime When pool becomes active (informational)
@@ -158,14 +159,23 @@ contract CricketPredictionPools is Ownable, Pausable, ReentrancyGuard {
         p.entryFee = entryFee;
         p.platformFeeBps = platformFeeBps;
         p.name = name;
-        p.desc=desc;
 
         // copy options into storage
         for (uint256 i = 0; i < options.length; i++) {
             p.options.push(options[i]);
         }
 
-        emit PoolCreated(poolId, name,desc, token, entryFee, startTime, lockTime, platformFeeBps, p.options);
+        emit PoolCreated(
+            poolId,
+            name,
+            desc,
+            token,
+            entryFee,
+            startTime,
+            lockTime,
+            platformFeeBps,
+            p.options
+        );
     }
 
     /**
@@ -184,7 +194,11 @@ contract CricketPredictionPools is Ownable, Pausable, ReentrancyGuard {
      * @notice Resolve a pool with the winning option index.
      *         Takes the platform fee immediately and freezes winners count.
      */
-    function resolvePool(uint256 poolId, uint8 winningOption) external onlyOwner nonReentrant {
+    function resolvePool(uint256 poolId, uint8 winningOption)
+        external
+        onlyOwner
+        nonReentrant
+    {
         PoolInfo storage p = pools[poolId];
         require(!p.resolved && !p.canceled, "done/canceled");
         require(p.lockTime > 0, "pool !exist");
@@ -200,14 +214,23 @@ contract CricketPredictionPools is Ownable, Pausable, ReentrancyGuard {
         // Transfer out platform fee now (pull model for winners later)
         if (p.platformFee > 0) {
             if (p.token == address(0)) {
-                (bool ok, ) = payable(feeRecipient).call{value: p.platformFee}("");
+                (bool ok, ) = payable(feeRecipient).call{value: p.platformFee}(
+                    ""
+                );
                 require(ok, "fee xfer failed");
             } else {
                 IERC20(p.token).safeTransfer(feeRecipient, p.platformFee);
             }
         }
 
-        emit Resolved(poolId, winningOption, p.totalPot, p.platformFee, p.netPot, p.winnersCount);
+        emit Resolved(
+            poolId,
+            winningOption,
+            p.totalPot,
+            p.platformFee,
+            p.netPot,
+            p.winnersCount
+        );
     }
 
     // ====== Player Actions ======
@@ -217,7 +240,12 @@ contract CricketPredictionPools is Ownable, Pausable, ReentrancyGuard {
      *         For ETH pools, send exact entryFee as msg.value.
      *         For ERC20 pools, approve this contract for entryFee first.
      */
-    function joinPool(uint256 poolId, uint8 optionIndex) external payable whenNotPaused nonReentrant {
+    function joinPool(uint256 poolId, uint8 optionIndex)
+        external
+        payable
+        whenNotPaused
+        nonReentrant
+    {
         PoolInfo storage p = pools[poolId];
         require(p.lockTime > 0, "pool !exist");
         require(block.timestamp < p.lockTime, "locked");
@@ -230,7 +258,11 @@ contract CricketPredictionPools is Ownable, Pausable, ReentrancyGuard {
             require(msg.value == p.entryFee, "wrong ETH");
         } else {
             require(msg.value == 0, "no ETH");
-            IERC20(p.token).safeTransferFrom(msg.sender, address(this), p.entryFee);
+            IERC20(p.token).safeTransferFrom(
+                msg.sender,
+                address(this),
+                p.entryFee
+            );
         }
 
         // Record join
@@ -289,7 +321,11 @@ contract CricketPredictionPools is Ownable, Pausable, ReentrancyGuard {
      * @notice Sweep leftover pot if no winners (after resolution), or sweep stuck ETH/ERC20 (admin only).
      *         Only callable when there are no winners or for non-pool balances.
      */
-    function sweepNoWinners(uint256 poolId, address to) external onlyOwner nonReentrant {
+    function sweepNoWinners(uint256 poolId, address to)
+        external
+        onlyOwner
+        nonReentrant
+    {
         require(to != address(0), "to=0");
         PoolInfo storage p = pools[poolId];
         require(p.resolved && !p.canceled, "bad state");
@@ -309,47 +345,23 @@ contract CricketPredictionPools is Ownable, Pausable, ReentrancyGuard {
 
     // ====== Views ======
 
-    function getOptions(uint256 poolId) external view returns (string[] memory) {
+    function getOptions(uint256 poolId)
+        external
+        view
+        returns (string[] memory)
+    {
         return pools[poolId].options;
     }
 
-    function getPool(uint256 poolId)
-    external
-    view
-    returns (
-        string memory name,
-        string memory desc,
-        address token,
-        uint256 entryFee,
-        uint64 startTime,
-        uint64 lockTime,
-        uint16 platformFeeBps,
-        string[] memory options,
-        bool resolved,
-        uint256 winningOption
-    )
-{
-    PoolInfo storage p = pools[poolId];
-    return (
-        p.name,
-        p.desc,
-        p.token,
-        p.entryFee,
-        p.startTime,
-        p.lockTime,
-        p.platformFeeBps,
-        p.options,
-        p.resolved,
-        p.winningOption
-    );
-}
-
-
-    function playerInfo(uint256 poolId, address player) external view returns (
-        bool _hasJoined,
-        uint8 _pick,
-        bool _claimed
-    ) {
+    function playerInfo(uint256 poolId, address player)
+        external
+        view
+        returns (
+            bool _hasJoined,
+            uint8 _pick,
+            bool _claimed
+        )
+    {
         _hasJoined = hasJoined[poolId][player];
         _pick = pickOf[poolId][player];
         _claimed = claimed[poolId][player];
@@ -357,4 +369,26 @@ contract CricketPredictionPools is Ownable, Pausable, ReentrancyGuard {
 
     // ====== Receive ETH ======
     receive() external payable {}
+
+    /**
+     * @notice Rescue any ERC20 tokens or native ETH mistakenly sent to this contract.
+     *         Does not affect pool accounting (owner must be careful not to drain active pots).
+     * @param token Token address to rescue (use address(0) for native ETH)
+     * @param to Recipient address (usually owner)
+     * @param amount Amount to transfer
+     */
+    function rescueFunds(
+        address token,
+        address to,
+        uint256 amount
+    ) external onlyOwner nonReentrant {
+        require(to != address(0), "to=0");
+        if (token == address(0)) {
+            // rescue native ETH
+            (bool ok, ) = payable(to).call{value: amount}("");
+            require(ok, "ETH rescue failed");
+        } else {
+            IERC20(token).safeTransfer(to, amount);
+        }
+    }
 }

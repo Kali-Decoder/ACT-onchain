@@ -1,8 +1,17 @@
-import { useHasJoined, useJoinPool, usePools, useResolvePool, usePlayerInfo, useIsOwner } from "@/hooks/useCricketPools";
+import { useHasJoined, useJoinPool, usePools, useResolvePool, usePlayerInfo, useIsOwner, useOptionEntryCounts } from "@/hooks/useCricketPools";
 import React, { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 import OptionButton from "./OptionButton";
-
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  Tooltip,
+  CartesianGrid,
+  Legend,
+  ResponsiveContainer,
+} from "recharts";
 const PoolModal = ({ setShowModal, pool, currentUser }) => {
   const { joinPool, isPending, isConfirming, isSuccess } = useJoinPool();
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
@@ -11,19 +20,16 @@ const PoolModal = ({ setShowModal, pool, currentUser }) => {
   const { refetchPools } = usePools();
   const { isOwner } = useIsOwner();
   const [timeLeft, setTimeLeft] = useState<number>(0);
-
   const { playerData, isLoading: playerLoading } = usePlayerInfo(pool.id, currentUser);
-  console.log(playerData);
+  const { counts: optionCounts } = useOptionEntryCounts(pool.id, pool?.options?.length || 0);
   useEffect(() => {
     if (!pool) return;
-
     const updateTimer = () => {
       const now = Math.floor(Date.now() / 1000);
       const diff = Math.max(pool.lockTime - now, 0);
       setTimeLeft(diff);
     };
-
-    updateTimer(); // initial call
+    updateTimer();
     const interval = setInterval(updateTimer, 1000);
     return () => clearInterval(interval);
   }, [pool]);
@@ -76,7 +82,7 @@ const PoolModal = ({ setShowModal, pool, currentUser }) => {
 
   return (
     <div className="fixed inset-0 z-50 bg-black bg-opacity-70 flex items-center justify-center p-0 sm:p-4">
-      <div className="bg-gray-900 text-white rounded-none sm:rounded-xl p-4 sm:p-6 w-screen h-screen sm:w-full sm:h-auto sm:max-w-5xl sm:max-h-[90vh] overflow-y-auto shadow-2xl relative">
+      <div className="bg-gray-900  text-white rounded-none sm:rounded-xl p-4 sm:p-6 w-[80vw] h-screen sm:w-full sm:h-auto sm:max-w-5xl sm:max-h-[90vh] overflow-y-auto shadow-2xl relative">
         {/* Close Button */}
         <button
           onClick={() => setShowModal(false)}
@@ -103,6 +109,7 @@ const PoolModal = ({ setShowModal, pool, currentUser }) => {
                 { label: "Platform Fee", value: `${pool?.platformFeeBps / 100}%` },
                 { label: "Resolved", value: pool?.resolved ? "✅ Yes" : "❌ No" },
                 { label: "Total Entries", value: pool?.totalEntries.toString() },
+                { label: "Winners Count", value: pool?.winnersCount?.toString() },
                 ...(pool?.resolved
                   ? [
                     {
@@ -122,6 +129,22 @@ const PoolModal = ({ setShowModal, pool, currentUser }) => {
               ))}
             </div>
 
+            {/* Pot Progress Bar */}
+            <div className="p-3 bg-gray-800 rounded-xl">
+              <h3 className="text-sm font-semibold mb-2">Total Pot</h3>
+              <div className="w-full bg-gray-700 rounded-full h-3 overflow-hidden">
+                <div
+                  className="bg-green-500 h-3"
+                  style={{
+                    width: `${Math.min((Number(pool?.netPot) / Number(pool?.totalPot)) * 100, 100)}%`,
+                  }}
+                ></div>
+              </div>
+              <p className="text-xs mt-2 text-gray-400">
+                Net Pot: {Number(pool?.netPot) / 1e18} MON / Total Pot: {Number(pool?.totalPot) / 1e18} MON
+              </p>
+            </div>
+
             {/* Player Info */}
             {!playerLoading && playerData.hasJoined && (
               <div className="p-3 bg-gray-800 rounded-xl space-y-1">
@@ -137,6 +160,30 @@ const PoolModal = ({ setShowModal, pool, currentUser }) => {
 
           {/* Right Side: Options & Actions */}
           <div className="flex flex-col justify-between">
+
+            <div className="mt-6">
+              <h3 className="text-xs font-semibold mb-2 text-center">Option Participation Trend</h3>
+              <ResponsiveContainer  width="100%" height={300}>
+                <LineChart
+                  data={pool?.options?.map((opt: string, idx: number) => ({
+                    option: opt,
+                    entries: optionCounts[idx] || 0,
+                  }))}
+                  
+                  margin={{ top: 10, right: 20, left: -10, bottom: 0 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" stroke="#444" />
+                  <XAxis dataKey="option" tick={{ fill: "#aaa", fontSize: 8 }} />
+                  <YAxis tick={{ fill: "#aaa", fontSize: 8 }} />
+                  <Tooltip
+                    contentStyle={{ backgroundColor: "black", border: "none",fontSize: "8px" }}
+                    labelStyle={{ color: "#fff" }}
+                  />
+                  {/* <Legend wrapperStyle={{ fontSize: "8px", color: "#fff" }} /> */}
+                  <Line type="monotone" dataKey="entries" stroke="#10b981" strokeWidth={1} dot={{ r: 1 }} />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
             {/* Options to Bet */}
             {!poolEnded && !pool?.resolved && (
               <div className="mb-6">
@@ -165,8 +212,8 @@ const PoolModal = ({ setShowModal, pool, currentUser }) => {
                 onClick={handleJoin}
                 disabled={poolEnded || selectedOption === null || isPending || isConfirming || hasJoined}
                 className={`retro rbtn-small whitespace-nowrap text-xs sm:text-sm w-full sm:w-2/3 text-center ${poolEnded || selectedOption === null || isPending || isConfirming || hasJoined
-                  ? "opacity-50 cursor-not-allowed"
-                  : ""
+                    ? "opacity-50 cursor-not-allowed"
+                    : ""
                   }`}
               >
                 {hasJoined
@@ -188,8 +235,8 @@ const PoolModal = ({ setShowModal, pool, currentUser }) => {
                         onClick={() => handleResolve(idx)}
                         disabled={resolvePending || resolveConfirming}
                         className={`px-4 py-2 whitespace-nowrap rounded-lg cursor-pointer text-xs font-semibold ${resolvePending || resolveConfirming
-                          ? "opacity-50 cursor-not-allowed bg-gray-600"
-                          : "bg-red-600 hover:bg-red-500 text-white"
+                            ? "opacity-50 cursor-not-allowed bg-gray-600"
+                            : "bg-red-600 hover:bg-red-500 text-white"
                           }`}
                       >
                         {resolvePending || resolveConfirming ? "Resolving..." : opt}

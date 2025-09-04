@@ -3,7 +3,7 @@ import { useAccount, useReadContract, useReadContracts, useWriteContract, useWai
 import { useMutation } from "@tanstack/react-query";
 import { Address, parseEther, zeroAddress } from "viem";
 import deployments from "../../../onchain-contracts/deployments/CricketPredictionPools.json"
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 export const cricketContract = {
     address: deployments.address as Address,
@@ -127,7 +127,6 @@ export function usePool(poolId?: number) {
 
 export function useIsOwner() {
     const { address } = useAccount();
-
     // Read owner from contract
     const { data: owner, isLoading } = useReadContract({
         ...cricketContract,
@@ -325,6 +324,7 @@ export function useCancelPool() {
 }
 
 export function usePlayerInfo(poolId: number, player: `0x${string}`) {
+    console.log(player, poolId, "player Data");
     const { data, isLoading, error } = useReadContract({
         ...cricketContract,
         functionName: "playerInfo",
@@ -360,4 +360,21 @@ export function useOptionEntryCount(poolId: number, optionIndex: number) {
         isLoading,
         error,
     };
+}
+
+
+export function useOptionEntryCounts(poolId: number, optionCount: number) {
+    const calls = Array.from({ length: optionCount }, (_, idx) => ({
+        ...cricketContract,
+        functionName: "optionEntryCount",
+        args: [BigInt(poolId), idx],
+    }));
+
+    const { data, isLoading, error } = useReadContracts({ contracts: calls });
+
+    const counts = data
+        ? data.map((res) => (res?.result ? Number(res.result) : 0))
+        : [];
+
+    return { counts, isLoading, error };
 }
