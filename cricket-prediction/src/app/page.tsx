@@ -29,8 +29,8 @@ export default function Home() {
   return (
     <>
       <PageTransition>
-        <Navbar />
-        <div className="w-[80%] mt-28 flex-col mx-auto bg-[#000618] ">
+      
+        <div className="w-[80%] mt-28 flex-col mx-auto bg-[#000618]  ">
           <header>
             <h1 className="uppercase mb-4">
               {isLoading ? "Loading Pools ..." : "Cricket Mania Pools"}

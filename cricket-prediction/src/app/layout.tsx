@@ -1,4 +1,5 @@
 "use client";
+import Navbar from "@/component/Navbar";
 import "./globals.css";
 import AppKitProvider from '@/providers/client-providers'
 export default function RootLayout({
@@ -10,8 +11,10 @@ export default function RootLayout({
     <html lang="en">
       <body>
         <AppKitProvider>
-          {children}
-        
+          <>
+            <Navbar/>
+            {children}
+          </>
         </AppKitProvider>
       </body>
     </html>

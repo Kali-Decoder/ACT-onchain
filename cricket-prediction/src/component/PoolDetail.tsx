@@ -2,10 +2,7 @@
 
 import React, { useState } from "react";
 import { useAccount } from "wagmi";
-
-import { useDataContext } from "@/context/DataContext";
 import Link from "next/link";
-import { ConnectButton } from "@rainbow-me/rainbowkit";
 import JoinModal from "./JoinModal";
 
 const PoolDetail = ({ singlePoolDetail }) => {
