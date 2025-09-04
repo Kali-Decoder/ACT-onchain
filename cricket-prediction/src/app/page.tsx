@@ -103,30 +103,27 @@ export default function Home() {
                           <p className="text-gray-400 text-xs mt-1">{pool?.desc}</p>
                         </div>
                       </div>
+
                       {/* Options */}
                       {pool?.options?.length > 0 && (
                         <div className="mb-6">
-                          <h3 className="text-xs font-semibold text-gray-300 mb-2">
-                            Options:
-                          </h3>
+                          <h3 className="text-xs font-semibold text-gray-300 mb-2">Options:</h3>
                           <div className="flex flex-wrap gap-2">
-                            {pool.options.map((opt, idx) => (
-                              <button
-                                key={idx}
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  console.log(
-                                    "Selected option:",
-                                    opt,
-                                    "in Pool:",
-                                    pool.id
-                                  );
-                                }}
-                                className="px-3 py-1 text-xs bg-gray-700 hover:bg-gray-600 rounded-md text-gray-200"
-                              >
-                                {opt}
-                              </button>
-                            ))}
+                            {pool.options.map((opt, idx) => {
+                              const isWinningOption = pool.resolved && idx === pool.winningOption;
+                              return (
+                                <button
+                                  key={idx}
+                                  onClick={(e) => e.stopPropagation()}
+                                  className={`px-3 py-1 text-xs rounded-md text-gray-200 ${isWinningOption
+                                      ? "bg-blue-500 hover:bg-blue-600"
+                                      : "bg-gray-700 hover:bg-gray-600"
+                                    }`}
+                                >
+                                  {opt}
+                                </button>
+                              );
+                            })}
                           </div>
                         </div>
                       )}
@@ -135,17 +132,13 @@ export default function Home() {
                       <div className="border-t border-gray-700 pt-4">
                         <div className="flex justify-between items-center mb-2">
                           <span className="text-gray-400 text-xs">Starting Bet</span>
-                          <span className="text-blue-400 text-xs font-medium">
-                            {entryFee} MON
-                          </span>
+                          <span className="text-blue-400 text-xs font-medium">{entryFee} MON</span>
                         </div>
 
                         {/* Total Pot Progress */}
                         <div className="flex justify-between items-center mb-1 mt-4">
                           <span className="text-gray-400 text-xs">Total Pot</span>
-                          <span className="text-green-400 text-xs font-medium">
-                            {totalPot} / 100 MON
-                          </span>
+                          <span className="text-green-400 text-xs font-medium">{totalPot} / 100 MON</span>
                         </div>
                         <div className="w-full h-2 bg-gray-700 rounded-full overflow-hidden">
                           <div
@@ -157,6 +150,7 @@ export default function Home() {
                     </div>
                   );
                 })}
+
             </section>
           </main>
 

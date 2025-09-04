@@ -1,25 +1,71 @@
-import { useHasJoined, useJoinPool } from "@/hooks/useCricketPools";
-import React, { useState } from "react";
+import { useHasJoined, useJoinPool, useResolvePool } from "@/hooks/useCricketPools";
+import React, { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 
-const PoolModal = ({ setShowModal, pool }) => {
+const PoolModal = ({ setShowModal, pool, currentUser }) => {
   const { joinPool, isPending, isConfirming, isSuccess } = useJoinPool();
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
   const { hasJoined, isLoading } = useHasJoined(pool.id);
+  const { resolvePool, isPending: resolvePending, isConfirming: resolveConfirming } = useResolvePool();
+
+  const [timeLeft, setTimeLeft] = useState<number>(0);
+
+  useEffect(() => {
+    if (!pool) return;
+
+    const updateTimer = () => {
+      const now = Math.floor(Date.now() / 1000);
+      const diff = Math.max(pool.lockTime - now, 0);
+      setTimeLeft(diff);
+    };
+
+    updateTimer(); // initial call
+
+    const interval = setInterval(updateTimer, 1000);
+    return () => clearInterval(interval);
+  }, [pool]);
+
+  const formatTime = (seconds: number) => {
+    const d = Math.floor(seconds / (3600 * 24));
+    const h = Math.floor((seconds % (3600 * 24)) / 3600);
+    const m = Math.floor((seconds % 3600) / 60);
+    const s = seconds % 60;
+    return `${d > 0 ? d + "d " : ""}${h.toString().padStart(2, "0")}:${m
+      .toString()
+      .padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
+  };
+
   if (!pool) return null;
 
   const poolEnded = Number(pool?.lockTime) < Math.floor(Date.now() / 1000);
+  const isOwner = currentUser?.toLowerCase() === pool?.owner?.toLowerCase();
 
-  const handleJoin = async () => {
+  const handleJoin = () => {
     if (selectedOption === null) return;
     if (hasJoined) {
-      toast.success("Already Betted !!!");
+      toast.success("Already joined!");
+      return;
     }
-    console.log(pool.id, selectedOption,pool?.entryFee);
-    joinPool(pool.id, selectedOption,pool?.entryFee);
-    if(!isLoading){
-      setShowModal(false);
-    }
+    joinPool(pool.id, selectedOption, pool?.entryFee, {
+      onSuccess: () => {
+        toast.success("Joined pool!");
+        setShowModal(false);
+      },
+      onError: (err) => {
+        console.error(err);
+        toast.error("Failed to join pool");
+      },
+    });
+  };
+
+  const handleResolve = (optionIndex: number) => {
+    resolvePool(pool.id, optionIndex, {
+      onSuccess: () => toast.success("Pool resolved!"),
+      onError: (err) => {
+        console.error(err);
+        toast.error("Failed to resolve pool");
+      },
+    });
   };
 
   return (
@@ -43,10 +89,18 @@ const PoolModal = ({ setShowModal, pool }) => {
             { label: "Pool ID", value: pool?.id },
             { label: "Entry Fee", value: `${Number(pool?.entryFee) / 1e18} MON` },
             { label: "Start Time", value: new Date(Number(pool?.startTime) * 1000).toLocaleString() },
-            { label: "Lock Time", value: new Date(Number(pool?.lockTime) * 1000).toLocaleString() },
+            { label: "Lock Time", value: poolEnded ? "Ended" : formatTime(timeLeft) },
             { label: "Platform Fee", value: `${pool?.platformFeeBps / 100}%` },
             { label: "Resolved", value: pool?.resolved ? "✅ Yes" : "❌ No" },
             { label: "Total Entries", value: pool?.totalEntries.toString() },
+            ...(pool?.resolved
+              ? [
+                {
+                  label: "Winning Option",
+                  value: `${pool?.winningOption}: ${pool?.options?.[pool?.winningOption] || "N/A"}`
+                }
+              ]
+              : []),
           ].map((item, idx) => (
             <div
               key={idx}
@@ -59,7 +113,7 @@ const PoolModal = ({ setShowModal, pool }) => {
         </div>
 
         {/* Options to Bet */}
-        {!poolEnded ? (
+        {!poolEnded && !pool?.resolved && (
           <div className="mb-6">
             <h3 className="text-sm font-semibold mb-2">Choose Your Option:</h3>
             <div className="flex flex-wrap gap-3">
@@ -80,21 +134,14 @@ const PoolModal = ({ setShowModal, pool }) => {
               ))}
             </div>
           </div>
-        ) : (
-          <div className="text-center mb-6">
-            <p className="text-red-500 font-semibold text-lg mb-2">⚠️ This pool has ended</p>
-            <p className="text-green-400 font-bold text-xl">
-              Winning Option: {pool?.winnersCount?.toString()}
-            </p>
-          </div>
         )}
 
-        {/* Action Button */}
-        <div className="text-center mt-4">
+        {/* Action Buttons */}
+        <div className="text-center mt-4 flex flex-col gap-2">
           <button
             onClick={handleJoin}
             disabled={poolEnded || selectedOption === null || isPending || isConfirming || hasJoined}
-            className={`retro rbtn-small text-sm ${poolEnded || selectedOption === null || isPending || isConfirming || hasJoined
+            className={`retro rbtn-small whitespace-nowrap text-sm w-2/3 text-center ${poolEnded || selectedOption === null || isPending || isConfirming || hasJoined
               ? "opacity-50 cursor-not-allowed"
               : ""
               }`}
@@ -107,13 +154,33 @@ const PoolModal = ({ setShowModal, pool }) => {
                   ? "Joined ✅"
                   : "Place Bet"}
           </button>
+
+          {/* Resolve button only for owner & not resolved */}
+          {isOwner && !pool?.resolved && (
+            <div className="mt-2">
+              <p className="text-xs text-gray-400 mb-1">Resolve Pool:</p>
+              {pool?.options?.map((opt, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => handleResolve(idx)}
+                  disabled={resolvePending || resolveConfirming}
+                  className={`px-4 py-2 m-1 whitespace-nowrap  rounded-lg cursor-pointer text-xs font-semibold ${resolvePending || resolveConfirming
+                    ? "opacity-50 cursor-not-allowed bg-gray-600"
+                    : "bg-red-600 hover:bg-red-500 text-white"
+                    }`}
+                >
+                  {resolvePending || resolveConfirming ? "Resolving..." : opt}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Has Joined Message */}
         {isLoading ? (
           <p className="text-gray-400 text-center mt-2">Checking participation...</p>
         ) : hasJoined ? (
-          <p className="text-yellow-400 text-center mt-2 font-semibold">
+          <p className="text-yellow-400 text-center mt-4 text-xs font-semibold">
             You have already joined this pool.
           </p>
         ) : null}
