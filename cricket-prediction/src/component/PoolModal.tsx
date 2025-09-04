@@ -82,7 +82,7 @@ const PoolModal = ({ setShowModal, pool, currentUser }) => {
 
   return (
     <div className="fixed inset-0 z-50 bg-black bg-opacity-70 flex items-center justify-center p-0 sm:p-4">
-      <div className="bg-gray-900  text-white rounded-none sm:rounded-xl p-4 sm:p-6 w-[80vw] h-screen sm:w-full sm:h-auto sm:max-w-5xl sm:max-h-[90vh] overflow-y-auto shadow-2xl relative">
+      <div className="bg-gray-900  text-white rounded-none sm:rounded-xl p-4 sm:p-6 w-[80vh] h-screen sm:w-full sm:h-auto sm:max-w-5xl sm:max-h-[90vh] overflow-y-auto shadow-2xl relative">
         {/* Close Button */}
         <button
           onClick={() => setShowModal(false)}
