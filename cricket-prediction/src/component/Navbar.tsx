@@ -18,7 +18,7 @@ const Navbar = () => {
 
   return (
     <>
-      <nav className="bg-transparent dark:bg-transparent fixed w-full z-20 top-0 start-0  dark:border-gray-600">
+<nav className="bg-white/30 dark:bg-gray-900/30 backdrop-blur-md fixed w-full z-20 top-0 start-0 dark:border-gray-600">
         <div className="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">
           <Link
             href="/"
