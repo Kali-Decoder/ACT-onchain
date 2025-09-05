@@ -12,7 +12,7 @@ export default function Home() {
   const [selectPoolId, setSelectPoolId] = useState<number | null>(null);
   const { pools, isLoading } = usePools();
   const [status, setStatus] = useState<"all" | "ongoing" | "ended">("all");
-  const {address} = useAccount();
+  const { address } = useAccount();
   // derive filtered pools
   const filteredPools = useMemo(() => {
     if (!pools?.length) return [];
@@ -76,7 +76,7 @@ export default function Home() {
                 filteredPools.map((pool) => {
                   const entryFee = Number(pool?.entryFee) / 1e18;
                   const totalPot = Number(pool?.totalPot) / 1e18;
-                  const progress = Math.min((totalPot / 100) * 100, 100);
+                  const totalEntries = Number(pool?.totalEntries);
 
                   return (
                     <div
@@ -96,11 +96,9 @@ export default function Home() {
 
                         {/* Name + Description */}
                         <div className="flex flex-col">
-                          <h2 className="text-md font-semibold uppercase text-white flex items-center gap-2">
-                            {pool?.name}
-                            {Number(pool?.lockTime) < Math.floor(Date.now() / 1000) && (
-                              <span className="text-red-500 text-sm font-normal">Ended</span>
-                            )}
+                          <h2 className="text-sm font-semibold uppercase text-white flex items-center gap-2">
+                            {pool?.name} ?
+
                           </h2>
                           <p className="text-gray-400 text-xs mt-1 line-clamp-2">{pool?.desc}</p>
                         </div>
@@ -118,8 +116,8 @@ export default function Home() {
                                   key={idx}
                                   onClick={(e) => e.stopPropagation()}
                                   className={`px-3 py-1 text-xs rounded-md text-gray-200 ${isWinningOption
-                                      ? "bg-blue-500 hover:bg-blue-600"
-                                      : "bg-gray-700 hover:bg-gray-600"
+                                    ? "bg-blue-500 hover:bg-blue-600"
+                                    : "bg-gray-700 hover:bg-gray-600"
                                     }`}
                                 >
                                   {opt}
@@ -130,15 +128,33 @@ export default function Home() {
                         </div>
                       )}
 
-                      {/* Entry Fee */}
+           
                       <div className="border-t border-gray-700 pt-4">
                         <div className="flex justify-between items-center mb-2">
                           <span className="text-gray-400 text-xs">Starting Bet</span>
                           <span className="text-blue-400 text-xs font-medium">{entryFee} MON</span>
                         </div>
+                        
+                        <div className="flex justify-between items-center mb-2">
+                          <span className="text-gray-400 text-xs">Total Pot</span>
+                          <span className="text-blue-400 text-xs font-medium">{totalPot} MON</span>
+                        </div>
 
-                        {/* Total Pot Progress */}
-                        <div className="flex justify-between items-center mb-1 mt-4">
+                        <div className="flex justify-between items-center mb-2">
+                          <span className="text-gray-400 text-xs">Total Entries</span>
+                          <span className="text-blue-400 text-xs font-medium">{totalEntries}</span>
+                        </div>
+
+                        <div className="flex justify-between items-center mb-2">
+                          <span className="text-gray-400 text-xs">Status</span>
+                          <span className="text-blue-400 text-xs font-medium"> {Number(pool?.lockTime) < Math.floor(Date.now() / 1000) && (
+                            <span className="text-red-500 text-xs font-normal">Ended</span>
+                          )}</span>
+                        </div>
+
+
+
+                        {/* <div className="flex justify-between items-center mb-1 mt-4">
                           <span className="text-gray-400 text-xs">Total Pot</span>
                           <span className="text-green-400 text-xs font-medium">{totalPot} / 100 MON</span>
                         </div>
@@ -147,7 +163,7 @@ export default function Home() {
                             className="h-2 bg-gradient-to-r from-green-400 to-green-600 rounded-full"
                             style={{ width: `${progress}%` }}
                           ></div>
-                        </div>
+                        </div> */}
                       </div>
                     </div>
                   );
