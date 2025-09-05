@@ -18,9 +18,9 @@ const PlayersBoard = ({ players }) => {
   // Hydration-safe sorting + filtering
   const filteredPlayers = useMemo(() => {
     if (!mounted || !players) return players || [];
-    const sorted = [...players].sort((a, b) => b.amount - a.amount);
+    const sorted = [...players].sort((a, b) => b.rewardPoints - a.rewardPoints);
     return sorted.filter((p) =>
-      p.user.toLowerCase().includes(search.toLowerCase())
+      p.address.toLowerCase().includes(search.toLowerCase())
     );
   }, [players, mounted, search]);
 
@@ -33,7 +33,7 @@ const PlayersBoard = ({ players }) => {
 
   if (!players || players.length === 0) {
     return (
-      <div className="w-1/2 bg-gradient-to-r from-purple-400 via-pink-500 to-red-500 rounded-2xl shadow-xl p-6">
+      <div className="w-1/1 bg-transparent flex justify-center flex-col p-6">
         <h2 className="text-2xl font-extrabold mb-4 text-center text-white drop-shadow-lg">
           🏆 Players Leaderboard
         </h2>
@@ -81,7 +81,7 @@ const PlayersBoard = ({ players }) => {
             <tbody>
               {paginatedPlayers?.map((player, index) => (
                 <motion.tr
-                  key={player.user}
+                  key={player.address}
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.05 }}
@@ -97,11 +97,11 @@ const PlayersBoard = ({ players }) => {
                     {index === 0 ? "🥇" : index === 1 ? "🥈" : index === 2 ? "🥉" : (currentPage - 1) * playersPerPage + index + 1}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-gray-700 flex items-center gap-2">
-                    {shortenAddress(player.user)}
+                    {shortenAddress(player?.address)}
                     <button
                       onClick={() => {
                         if (typeof window !== "undefined") {
-                          navigator.clipboard.writeText(player.user);
+                          navigator.clipboard.writeText(player?.address);
                         }
                         toast.success("Address Copied!!!")
                       }}
@@ -112,7 +112,7 @@ const PlayersBoard = ({ players }) => {
                   </td>
                  
                   <td className="px-6 py-4 whitespace-nowrap text-gray-800 font-semibold">
-                    {player.targetScore}
+                    {player?.rewardPoints}
                   </td>
                 </motion.tr>
               ))}

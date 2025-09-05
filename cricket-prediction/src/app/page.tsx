@@ -5,6 +5,7 @@ import Navbar from "@/component/Navbar";
 import { PageTransition } from "@/component/PageTransition";
 import { usePools } from "@/hooks/useCricketPools";
 import { useAccount } from "wagmi";
+import Link from "next/link";
 
 
 export default function Home() {
@@ -61,6 +62,13 @@ export default function Home() {
                   }`}
               >
                 Ended Pools
+              </button>
+              <button
+                
+                className={`retro rbtn-small text-xs mr-2 sm:mr-4 ${status === "ended" ? "bg-purple-500" : ""
+                  }`}
+              >
+                <Link href={"/leaderboard"}>Leaderboard</Link>
               </button>
             </div>
           </div>
