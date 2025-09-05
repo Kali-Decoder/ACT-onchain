@@ -1,4 +1,4 @@
-import { useHasJoined, useJoinPool, usePools, useResolvePool, usePlayerInfo, useIsOwner, useOptionEntryCounts } from "@/hooks/useCricketPools";
+import { useHasJoined, useJoinPool, usePools, useResolvePool, usePlayerInfo, useIsOwner, useOptionEntryCounts, useClaim } from "@/hooks/useCricketPools";
 import React, { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 import OptionButton from "./OptionButton";
@@ -21,6 +21,7 @@ const PoolModal = ({ setShowModal, pool, currentUser }) => {
   const { isOwner } = useIsOwner();
   const [timeLeft, setTimeLeft] = useState<number>(0);
   const { playerData, isLoading: playerLoading } = usePlayerInfo(pool.id, currentUser);
+  const { claim, isPending: claimPending, isConfirming: claimConfirming, isSuccess: claimSuccess } = useClaim();
   const { counts: optionCounts } = useOptionEntryCounts(pool.id, pool?.options?.length || 0);
   useEffect(() => {
     if (!pool) return;
@@ -63,6 +64,19 @@ const PoolModal = ({ setShowModal, pool, currentUser }) => {
       onError: (err) => {
         console.error(err);
         toast.error("Failed to join pool");
+      },
+    });
+  };
+
+  const handleClaim = (poolId: number) => {
+    claim(poolId, {
+      onSuccess: () => {
+        toast.success("Winnings claimed! 🎉");
+        refetchPools();
+      },
+      onError: (err) => {
+        console.error(err);
+        toast.error("Failed to claim winnings");
       },
     });
   };
@@ -163,20 +177,20 @@ const PoolModal = ({ setShowModal, pool, currentUser }) => {
 
             <div className="mt-6">
               <h3 className="text-xs font-semibold mb-2 text-center">Option Participation Trend</h3>
-              <ResponsiveContainer  width="100%" height={300}>
+              <ResponsiveContainer width="100%" height={300}>
                 <LineChart
                   data={pool?.options?.map((opt: string, idx: number) => ({
                     option: opt,
                     entries: optionCounts[idx] || 0,
                   }))}
-                  
+
                   margin={{ top: 10, right: 20, left: -10, bottom: 0 }}
                 >
                   <CartesianGrid strokeDasharray="3 3" stroke="#444" />
                   <XAxis dataKey="option" tick={{ fill: "#aaa", fontSize: 8 }} />
                   <YAxis tick={{ fill: "#aaa", fontSize: 8 }} />
                   <Tooltip
-                    contentStyle={{ backgroundColor: "black", border: "none",fontSize: "8px" }}
+                    contentStyle={{ backgroundColor: "black", border: "none", fontSize: "8px" }}
                     labelStyle={{ color: "#fff" }}
                   />
                   {/* <Legend wrapperStyle={{ fontSize: "8px", color: "#fff" }} /> */}
@@ -208,12 +222,23 @@ const PoolModal = ({ setShowModal, pool, currentUser }) => {
 
             {/* Action Buttons */}
             <div className="flex flex-col items-center gap-2">
+              {/* Join button */}
               <button
                 onClick={handleJoin}
-                disabled={poolEnded || selectedOption === null || isPending || isConfirming || hasJoined}
-                className={`retro rbtn-small whitespace-nowrap text-xs sm:text-sm w-full sm:w-2/3 text-center ${poolEnded || selectedOption === null || isPending || isConfirming || hasJoined
-                    ? "opacity-50 cursor-not-allowed"
-                    : ""
+                disabled={
+                  poolEnded ||
+                  selectedOption === null ||
+                  isPending ||
+                  isConfirming ||
+                  hasJoined
+                }
+                className={`retro rbtn-small whitespace-nowrap text-xs sm:text-sm w-full sm:w-2/3 text-center ${poolEnded ||
+                  selectedOption === null ||
+                  isPending ||
+                  isConfirming ||
+                  hasJoined
+                  ? "opacity-50 cursor-not-allowed"
+                  : ""
                   }`}
               >
                 {hasJoined
@@ -225,6 +250,7 @@ const PoolModal = ({ setShowModal, pool, currentUser }) => {
                       : "Place Bet"}
               </button>
 
+              {/* Resolve button (owner only) */}
               {isOwner && !pool?.resolved && poolEnded && (
                 <div className="mt-2 w-full text-center">
                   <p className="text-xs text-gray-400 mb-1">Resolve Pool:</p>
@@ -235,8 +261,8 @@ const PoolModal = ({ setShowModal, pool, currentUser }) => {
                         onClick={() => handleResolve(idx)}
                         disabled={resolvePending || resolveConfirming}
                         className={`px-4 py-2 whitespace-nowrap rounded-lg cursor-pointer text-xs font-semibold ${resolvePending || resolveConfirming
-                            ? "opacity-50 cursor-not-allowed bg-gray-600"
-                            : "bg-red-600 hover:bg-red-500 text-white"
+                          ? "opacity-50 cursor-not-allowed bg-gray-600"
+                          : "bg-red-600 hover:bg-red-500 text-white"
                           }`}
                       >
                         {resolvePending || resolveConfirming ? "Resolving..." : opt}
@@ -245,7 +271,26 @@ const PoolModal = ({ setShowModal, pool, currentUser }) => {
                   </div>
                 </div>
               )}
+
+              {/* Claim button (player winner) */}
+              {pool?.resolved &&
+                playerData?.hasJoined &&
+                !playerData?.claimed &&
+                playerData?.pick === pool?.winningOption && (
+                  <button
+                    onClick={() => handleClaim(pool.id)}
+                    disabled={claimPending || claimConfirming}
+                    className={`px-4 cursor-pointer py-2 rounded-lg text-xs font-semibold mt-2 ${claimPending || claimConfirming
+                        ? "opacity-50 cursor-not-allowed bg-gray-600"
+                        : "bg-green-600 hover:bg-green-500 text-white"
+                      }`}
+                  >
+                    {claimPending || claimConfirming ? "Claiming..." : "Claim Winnings 🎉"}
+                  </button>
+                )}
+
             </div>
+
 
             {/* Has Joined Message */}
             {isLoading && (
