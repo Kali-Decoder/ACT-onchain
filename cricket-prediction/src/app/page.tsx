@@ -128,13 +128,13 @@ export default function Home() {
                         </div>
                       )}
 
-           
+
                       <div className="border-t border-gray-700 pt-4">
                         <div className="flex justify-between items-center mb-2">
                           <span className="text-gray-400 text-xs">Starting Bet</span>
                           <span className="text-blue-400 text-xs font-medium">{entryFee} MON</span>
                         </div>
-                        
+
                         <div className="flex justify-between items-center mb-2">
                           <span className="text-gray-400 text-xs">Total Pot</span>
                           <span className="text-blue-400 text-xs font-medium">{totalPot} MON</span>
@@ -147,9 +147,9 @@ export default function Home() {
 
                         <div className="flex justify-between items-center mb-2">
                           <span className="text-gray-400 text-xs">Status</span>
-                          <span className="text-blue-400 text-xs font-medium"> {Number(pool?.lockTime) < Math.floor(Date.now() / 1000) && (
+                          <span className="text-blue-400 text-xs font-medium"> {Number(pool?.lockTime) < Math.floor(Date.now() / 1000) ? (
                             <span className="text-red-500 text-xs font-normal">Ended</span>
-                          )}</span>
+                          ): ( <span className="text-green-500 text-xs font-normal">Live</span>)}</span>
                         </div>
 
 

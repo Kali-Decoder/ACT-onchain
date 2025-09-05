@@ -1,27 +1,19 @@
 "use client";
-
-import PoolComponent from "@/component/PoolComponent";
-import React, { useEffect, useState, Suspense } from "react";
-import { usePool } from "@/hooks/useCricketPools";
-
-const PageContent = () => {
- 
-  const [loading, setLoading] = useState(false);
-  const {pool,options} = usePool(1);
-  if (loading) {
-    return <div>Loading Pool...</div>;
-  }
-
-  return (
-    <PoolComponent singlePoolDetail={pool} />
-  
-  );
-};
+import PlayersBoard from "@/component/PlayersBoard";
+import { useLeaderboard } from "@/hooks/apiHooks";
+import React, { Suspense } from "react";
 
 const Page = () => {
+  const { data: leaderboard, isLoading, error } = useLeaderboard();
+
+  if (isLoading) return <p className="mt-[10%]">Loading leaderboard...</p>;
+  if (error) return <p className="mt-[10%]">Error loading leaderboard</p>;
+  if(leaderboard.length==0) return <p className="mt-[10%]">No Data Avaialable </p>;
   return (
     <Suspense fallback={<div>Loading Page...</div>}>
-      <PageContent />
+      <div className="flex mt-[10%]">
+        <PlayersBoard players={leaderboard} />
+      </div>
     </Suspense>
   );
 };

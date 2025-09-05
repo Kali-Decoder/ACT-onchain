@@ -12,8 +12,9 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
+import { useBet } from "@/hooks/apiHooks";
 const PoolModal = ({ setShowModal, pool, currentUser }) => {
-  const { joinPool, isPending, isConfirming, isSuccess } = useJoinPool();
+  const { joinPool, isPending, isConfirming, isSuccess, data: joinPoolHash } = useJoinPool();
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
   const { hasJoined, isLoading } = useHasJoined(pool.id);
   const { resolvePool, isPending: resolvePending, isConfirming: resolveConfirming } = useResolvePool();
@@ -23,6 +24,7 @@ const PoolModal = ({ setShowModal, pool, currentUser }) => {
   const { playerData, isLoading: playerLoading } = usePlayerInfo(pool.id, currentUser);
   const { claim, isPending: claimPending, isConfirming: claimConfirming, isSuccess: claimSuccess } = useClaim();
   const { counts: optionCounts } = useOptionEntryCounts(pool.id, pool?.options?.length || 0);
+  const betMutation = useBet();
   useEffect(() => {
     if (!pool) return;
     const updateTimer = () => {
@@ -49,49 +51,34 @@ const PoolModal = ({ setShowModal, pool, currentUser }) => {
 
   const poolEnded = Number(pool?.lockTime) < Math.floor(Date.now() / 1000);
 
+  useEffect(() => {
+    if (isSuccess && joinPoolHash) {
+      betMutation.mutate({
+        address: currentUser,
+        transactionHash: joinPoolHash,
+      });
+      refetchPools();
+    }
+  }, [isSuccess, joinPoolHash, currentUser, betMutation, refetchPools]);
+
   const handleJoin = () => {
     if (selectedOption === null) return;
     if (hasJoined) {
       toast.success("Already joined!");
       return;
     }
-    joinPool(pool.id, selectedOption, pool?.entryFee, {
-      onSuccess: () => {
-        toast.success("Joined pool!");
-        setShowModal(false);
-        refetchPools();
-      },
-      onError: (err) => {
-        console.error(err);
-        toast.error("Failed to join pool");
-      },
-    });
+    joinPool(pool.id, selectedOption, pool?.entryFee);
   };
 
   const handleClaim = (poolId: number) => {
-    claim(poolId, {
-      onSuccess: () => {
-        toast.success("Winnings claimed! 🎉");
-        refetchPools();
-      },
-      onError: (err) => {
-        console.error(err);
-        toast.error("Failed to claim winnings");
-      },
-    });
+    claim(poolId);
+    toast.success("Winnings claimed! 🎉");
+    refetchPools();
   };
 
   const handleResolve = (optionIndex: number) => {
-    resolvePool(pool.id, optionIndex, {
-      onSuccess: () => {
-        toast.success("Pool resolved!");
-        refetchPools();
-      },
-      onError: (err) => {
-        console.error(err);
-        toast.error("Failed to resolve pool");
-      },
-    });
+    resolvePool(pool.id, optionIndex);
+    refetchPools();
   };
 
   return (
@@ -200,7 +187,7 @@ const PoolModal = ({ setShowModal, pool, currentUser }) => {
             </div>
             {/* Options to Bet */}
             {!poolEnded && !pool?.resolved && (
-              <div className="mb-6">
+              <div className="mb-6 mt-4 p-4">
                 <h3 className="text-sm font-semibold mb-2">Choose Your Option:</h3>
                 <div className="flex flex-wrap gap-2 sm:gap-3">
                   {pool?.options?.map((opt, idx) => (
@@ -281,8 +268,8 @@ const PoolModal = ({ setShowModal, pool, currentUser }) => {
                     onClick={() => handleClaim(pool.id)}
                     disabled={claimPending || claimConfirming}
                     className={`px-4 cursor-pointer py-2 rounded-lg text-xs font-semibold mt-2 ${claimPending || claimConfirming
-                        ? "opacity-50 cursor-not-allowed bg-gray-600"
-                        : "bg-green-600 hover:bg-green-500 text-white"
+                      ? "opacity-50 cursor-not-allowed bg-gray-600"
+                      : "bg-green-600 hover:bg-green-500 text-white"
                       }`}
                   >
                     {claimPending || claimConfirming ? "Claiming..." : "Claim Winnings 🎉"}
