@@ -12,6 +12,7 @@ const Page = () => {
     <Suspense fallback={<div>Loading Page...</div>}>
       <div className="flex mt-[10%]">
         <PlayersBoard players={leaderboard} />
+    
       </div>
     </Suspense>
   );

@@ -32,7 +32,7 @@ export default function Home() {
     <>
       <PageTransition>
         <Navbar />
-        <div className="w-full sm:w-[90%] lg:w-[80%] mt-24 sm:mt-28 flex-col mx-auto bg-[#000618] px-4 sm:px-0">
+        <div className="w-full sm:w-[90%] lg:w-[80%] mt-32 sm:mt-28 flex-col mx-auto bg-[#000618] px-4 sm:px-0">
           <header>
             <h1 className="uppercase mb-4">
               {isLoading ? "Loading Pools ..." : "Cricket Mania Pools"}
