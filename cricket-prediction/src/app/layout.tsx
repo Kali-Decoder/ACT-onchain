@@ -24,7 +24,7 @@ export default function RootLayout({
           "action": {
             "type": "launch_frame",
             "name": "Cricket Mania",
-            "url": "http://cricket-mania-lovat.vercel.app/",
+            "url": "https://cricket.athenafoss.com/",
             "splashImageUrl": "https://media.tenor.com/yDA46Ztr58AAAAAM/virat-funny-virat-huh.gif",
             "splashBackgroundColor": "black"
           }
