@@ -1,9 +1,9 @@
 {
-    "accountAssociation": {
-        "header": "eyJmaWQiOjEwNzU5MDYsInR5cGUiOiJjdXN0b2R5Iiwia2V5IjoiMHg4QjNkRGRENTlFMzZBNGYwZmU4RUI3OGE0RDVERjhmNjA5MDdDQkMyIn0",
-        "payload": "eyJkb21haW4iOiJjcmlja2V0LW1hbmlhLWxvdmF0LnZlcmNlbC5hcHAifQ",
-        "signature": "MHhiYzNkNzgwNzgzYzNiZmNiZmQyOWIwYWE1NDU4NmNjMmQ3YjVlYTk4MDFhYTQyN2I4ZDdlN2Q3YzFhNmY3ZjAxMjM4Y2VlNGVmYWZiZWNlZDA0OWFjYjAyNjAwZDMwODg0N2IwYjNiNzIxMDA4Y2QwYjJkZTc0YzU4NWU3NGRkYzFj"
-    },
+   "accountAssociation": {
+    "header": "eyJmaWQiOjEwNzU5MDYsInR5cGUiOiJjdXN0b2R5Iiwia2V5IjoiMHg4QjNkRGRENTlFMzZBNGYwZmU4RUI3OGE0RDVERjhmNjA5MDdDQkMyIn0",
+    "payload": "eyJkb21haW4iOiJjcmlja2V0LmF0aGVuYWZvc3MuY29tIn0",
+    "signature": "MHg2YTAwNTNjNWM5M2FhYzhhOWNkYzM2MWE4NWEyYzM3ODBjZWNlYTcyM2JmYzFmYWMzNzQ5ZDNjYjA2YjFhNjc4NGMwZGYzZWQwZGM0NTk0MmEwMGFjNTI1OTljMzA5Zjg4NWFhN2YxMDU2OTAzNDJkMGNmOWYzMGM0OWJjYmUyYjFi"
+  },
     "frame": {
       "version": "1",
       "name": "Cricket Mania",
