@@ -59,11 +59,11 @@ const Navbar = () => {
                   🟢 {address.slice(0, 4) + "..." + address.slice(-3)}
                 </button>
               )}
-              {!address && (
+              
                 <div className="shrink-0">
                   <ConnectButton />
                 </div>
-              )}
+  
             </div>
 
             {/* Mobile menu button */}

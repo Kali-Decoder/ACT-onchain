@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { useAccount } from "wagmi";
 import Link from "next/link";
 import JoinModal from "./JoinModal";
+import ConnectButton from "@/providers/wallet-connect";
 
 const PoolDetail = ({ singlePoolDetail }) => {
   const { address } = useAccount();
@@ -172,7 +173,7 @@ const PoolDetail = ({ singlePoolDetail }) => {
           </>
         ) : (
           <div>
-            Connect Your Wallet <ConnectButton />
+            Connect Your Wallet <ConnectButton   />
           </div>
         )}
       </div>
