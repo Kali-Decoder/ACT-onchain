@@ -83,7 +83,7 @@ const PoolModal = ({ setShowModal, pool, currentUser }) => {
 
   return (
     <div className="fixed inset-0 z-50 bg-black bg-opacity-70 flex items-center justify-center p-0 sm:p-4">
-      <div className="bg-gray-900  text-white rounded-none sm:rounded-xl p-4 sm:p-6 w-[80vh] h-screen sm:w-full sm:h-auto sm:max-w-5xl sm:max-h-[90vh] overflow-y-auto shadow-2xl relative">
+      <div className="bg-gray-900  text-white rounded-none sm:rounded-xl p-4 sm:p-10 w-[80vh] h-screen sm:w-full sm:h-auto sm:max-w-5xl sm:max-h-[90vh] overflow-y-auto shadow-2xl relative">
         {/* Close Button */}
         <button
           onClick={() => setShowModal(false)}
@@ -93,15 +93,15 @@ const PoolModal = ({ setShowModal, pool, currentUser }) => {
         </button>
 
         {/* Title */}
-        <h2 className="text-lg sm:text-xl font-bold mb-3 sm:mb-6">{pool?.name}</h2>
+        <h2 className="text-lg sm:text-xl text-blue-500 font-bold mb-3 sm:mb-6">{pool?.name}</h2>
         <p className="text-xs font-bold mb-4 sm:mb-6">{pool?.desc}</p>
 
         {/* Main Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-6">
           {/* Left Side: Pool & Player Info */}
-          <div className="space-y-4">
+          <div className="space-y-3 sm:space-y-4">
             {/* Pool Details */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+            <div className="grid grid-cols-2 gap-3 sm:gap-4">
               {[
                 { label: "Pool ID", value: pool?.id },
                 { label: "Entry Fee", value: `${Number(pool?.entryFee) / 1e18} MON` },
@@ -125,10 +125,13 @@ const PoolModal = ({ setShowModal, pool, currentUser }) => {
                   className="bg-gray-800 p-3 rounded-xl flex flex-col justify-center items-start"
                 >
                   <span className="text-gray-400 text-xs">{item.label}</span>
-                  <span className="font-semibold text-white mt-1 text-xs break-words">{item.value}</span>
+                  <span className="font-semibold text-white mt-1 text-xs break-words">
+                    {item.value}
+                  </span>
                 </div>
               ))}
             </div>
+
 
             {/* Pot Progress Bar */}
             <div className="p-3 bg-gray-800 rounded-xl">
@@ -208,7 +211,7 @@ const PoolModal = ({ setShowModal, pool, currentUser }) => {
             )}
 
             {/* Action Buttons */}
-            <div className="flex flex-col items-center gap-2">
+            <div className="flex flex-col items-center gap-2 sm:p-4">
               {/* Join button */}
               <button
                 onClick={handleJoin}
