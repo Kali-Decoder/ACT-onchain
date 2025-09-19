@@ -32,15 +32,15 @@ export default function Home() {
     <>
       <PageTransition>
         <Navbar />
-        <div className="w-full sm:w-[90%] lg:w-[80%] mt-32 sm:mt-28 flex-col mx-auto bg-[#000618] px-4 sm:px-0">
-          <header>
-            <h1 className="uppercase mb-4">
+        <div className="w-full sm:w-[90%]  lg:w-[80%] mt-32 sm:mt-28 flex-col mx-auto bg-[#000618] px-4 sm:px-0">
+          <header className="px-2">
+            <h1 className="uppercase py-4">
               {isLoading ? "Loading Pools ..." : "Cricket Mania Pools"}
             </h1>
           </header>
 
           {/* Filter buttons */}
-          <div className="flex flex-wrap gap-2 sm:gap-0">
+          <div className="flex px-2 flex-wrap gap-2 sm:gap-0">
             <div className="flex flex-wrap items-center">
               <button
                 onClick={() => setStatus("all")}
@@ -74,8 +74,8 @@ export default function Home() {
           </div>
 
           {/* Pool cards */}
-          <main className="mt-8">
-            <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+          <main className="mt-8 ">
+            <section className="grid px-2 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
               {filteredPools.length === 0 && !isLoading && (
                 <h1 className="uppercase">No Pools Available</h1>
               )}

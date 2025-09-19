@@ -62,42 +62,44 @@ const Navbar = () => {
             </button>
           </div>
 
-          {/* Mobile Menu with Smooth Toggle */}
+          {/* Mobile Menu */}
           <div
             ref={menuRef}
-            className={`overflow-hidden transition-all duration-300 ease-in-out w-full max-w-7xl px-6 bg-white/30 dark:bg-gray-900/40 backdrop-blur-xl shadow-lg rounded-xl flex flex-col items-center space-y-4 border border-white/20 mt-2 relative mx-auto ${
-              isMobileMenuOpen ? "max-h-[1000px] py-4" : "max-h-0 py-0"
-            }`}
+            className={`w-full max-w-7xl mx-auto mt-2 rounded-xl bg-white/30 dark:bg-gray-900/40 backdrop-blur-xl border border-white/20 shadow-lg overflow-hidden transition-all duration-300 ease-in-out
+              ${isMobileMenuOpen ? "max-h-[1000px] opacity-100 py-4" : "max-h-0 opacity-0 py-0"}
+            `}
           >
-            {/* Owner Controls */}
-            {address && isOwner && (
-              <div className="flex flex-col items-center gap-2 w-full">
-                <button
-                  onClick={() => {
-                    setShowCreatePoolModal(true);
-                    setIsMobileMenuOpen(false);
-                  }}
-                  className="retro rbtn-small text-xs w-full"
-                >
-                  Create Pool
-                </button>
-                <button
-                  // onClick={async()=>{ await withdrawlContractBalance(); }}
-                  className="retro rbtn-small text-xs w-full"
-                >
-                  Balance {"💰 " + balanceData?.formatted}
-                </button>
-              </div>
-            )}
-
-            {/* Wallet Connect */}
-            <div className="flex items-center gap-2 w-full justify-center">
-              {address && (
-                <span className="retro rbtn-small text-xs">
-                  🟢 {address.slice(0, 4) + "..." + address.slice(-3)}
-                </span>
+            <div className="flex flex-col items-center gap-3 w-full px-4">
+              {/* Owner Controls */}
+              {address && isOwner && (
+                <div className="flex flex-col gap-2 w-full">
+                  <button
+                    onClick={() => {
+                      setShowCreatePoolModal(true);
+                      setIsMobileMenuOpen(false);
+                    }}
+                    className="retro rbtn-small text-xs w-full"
+                  >
+                    Create Pool
+                  </button>
+                  <button
+                    // onClick={async()=>{ await withdrawlContractBalance(); }}
+                    className="retro rbtn-small text-xs w-full"
+                  >
+                    Balance {"💰 " + balanceData?.formatted}
+                  </button>
+                </div>
               )}
-              <ConnectButton />
+
+              {/* Wallet Connect */}
+              <div className="flex items-center gap-2 w-full justify-center">
+                {address && (
+                  <span className="retro rbtn-small text-xs">
+                    🟢 {address.slice(0, 4) + "..." + address.slice(-3)}
+                  </span>
+                )}
+                <ConnectButton />
+              </div>
             </div>
           </div>
         </div>
