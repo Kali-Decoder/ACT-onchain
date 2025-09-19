@@ -2,13 +2,12 @@
 
 import ConnectButton from "@/providers/wallet-connect";
 import Link from "next/link";
-import React from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { useAccount, useBalance } from "wagmi";
 import CreatePoolModal from "./CreatePoolModal";
 import deployments from "../../../onchain-contracts/deployments/CricketPredictionPools.json";
 import { useIsOwner } from "@/hooks/useCricketPools";
 
-import { useState } from "react";
 import { Menu, X } from "lucide-react";
 
 const Navbar = () => {
@@ -20,6 +19,27 @@ const Navbar = () => {
     address: deployments.address,
     watch: true,
   });
+
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  // Close menu when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setIsMobileMenuOpen(false);
+      }
+    }
+
+    if (isMobileMenuOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    } else {
+      document.removeEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isMobileMenuOpen]);
 
   return (
     <>
@@ -42,43 +62,44 @@ const Navbar = () => {
             </button>
           </div>
 
-          {/* Mobile Menu */}
-          {isMobileMenuOpen && (
-             <div className="w-full max-w-7xl px-6 bg-white/30 dark:bg-gray-900/40 backdrop-blur-xl shadow-lg rounded-xl py-4 flex flex-col items-center space-y-4 border border-white/20 mt-2 z-50
-             relative mx-auto">
-
-              {/* Owner Controls */}
-              {address && isOwner && (
-                <div className="flex flex-col items-center gap-2">
-                  <button
-                    onClick={() => {
-                      setShowCreatePoolModal(true);
-                      setIsMobileMenuOpen(false);
-                    }}
-                    className="retro rbtn-small text-xs"
-                  >
-                    Create Pool
-                  </button>
-                  <button
-                   // onClick={async()=>{ await withdrawlContractBalance(); }}
-                   className="retro rbtn-small text-xs"
-                  >
-                    Balance {"💰 " + balanceData?.formatted}
-                  </button>
-                </div>
-              )}
-
-              {/* Wallet Connect */}
-              <div className="flex items-center gap-2">
-                {address && (
-                  <span className="retro rbtn-small text-xs">
-                    🟢 {address.slice(0, 4) + "..." + address.slice(-3)}
-                  </span>
-                )}
-                <ConnectButton />
+          {/* Mobile Menu with Smooth Toggle */}
+          <div
+            ref={menuRef}
+            className={`overflow-hidden transition-all duration-300 ease-in-out w-full max-w-7xl px-6 bg-white/30 dark:bg-gray-900/40 backdrop-blur-xl shadow-lg rounded-xl flex flex-col items-center space-y-4 border border-white/20 mt-2 relative mx-auto ${
+              isMobileMenuOpen ? "max-h-[1000px] py-4" : "max-h-0 py-0"
+            }`}
+          >
+            {/* Owner Controls */}
+            {address && isOwner && (
+              <div className="flex flex-col items-center gap-2 w-full">
+                <button
+                  onClick={() => {
+                    setShowCreatePoolModal(true);
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className="retro rbtn-small text-xs w-full"
+                >
+                  Create Pool
+                </button>
+                <button
+                  // onClick={async()=>{ await withdrawlContractBalance(); }}
+                  className="retro rbtn-small text-xs w-full"
+                >
+                  Balance {"💰 " + balanceData?.formatted}
+                </button>
               </div>
+            )}
+
+            {/* Wallet Connect */}
+            <div className="flex items-center gap-2 w-full justify-center">
+              {address && (
+                <span className="retro rbtn-small text-xs">
+                  🟢 {address.slice(0, 4) + "..." + address.slice(-3)}
+                </span>
+              )}
+              <ConnectButton />
             </div>
-          )}
+          </div>
         </div>
       </nav>
 
