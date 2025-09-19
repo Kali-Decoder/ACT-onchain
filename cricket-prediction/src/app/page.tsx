@@ -6,6 +6,8 @@ import { usePools } from "@/hooks/useCricketPools";
 import { useAccount } from "wagmi";
 import Navbar from "@/component/Navbar";
 import FarcasterPopup from "@/component/FarcasterPopup";
+import MobileFooterFilters from "@/component/MobileFooterFilters";
+import Image from "next/image";
 
 export default function Home() {
   const [showModal, setShowModal] = useState(false);
@@ -17,7 +19,7 @@ export default function Home() {
 
   // Detect desktop/tablet based on window width
   useEffect(() => {
-    const handleResize = () => setIsDesktop(window.innerWidth >= 640);
+    const handleResize = () => setIsDesktop(window.innerWidth >= 640); // md breakpoint
     handleResize();
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
@@ -44,46 +46,25 @@ export default function Home() {
     <PageTransition>
       <Navbar />
 
-      <div className="w-full sm:w-[90%] lg:w-[80%] mt-32 sm:mt-28 flex-col mx-auto bg-[#000618] px-4 sm:px-0">
+      {/* Background image */}
+      <div className="fixed inset-0 -z-10">
+        <Image
+          src="/hero-bg.jpg"
+          alt="Abstract blockchain background"
+          fill
+          className="object-cover scale-100"
+          priority
+        />
+        <div className="absolute inset-0 bg-black/50" />
+      </div>
+
+      <div className="w-full sm:w-[90%] lg:w-[80%] mt-32 sm:mt-28 flex-col mx-auto px-4 sm:px-0">
         {/* Header */}
         <header className="px-2">
           <h1 className="uppercase py-4">
             {isLoading ? "Loading Pools ..." : "Cricket Mania Pools"}
           </h1>
         </header>
-
-        {/* Filter buttons */}
-        <div className="flex px-2 flex-wrap gap-2 sm:gap-0">
-          <div className="flex flex-wrap items-center">
-            <button
-              onClick={() => setStatus("all")}
-              className={`retro rbtn-small text-xs mr-2 sm:mr-4 ${
-                status === "all" ? "bg-purple-500" : ""
-              }`}
-            >
-              All
-            </button>
-            <button
-              onClick={() => setStatus("ongoing")}
-              className={`retro rbtn-small text-xs mr-2 sm:mr-4 ${
-                status === "ongoing" ? "bg-purple-500" : ""
-              }`}
-            >
-              On Going Pools
-            </button>
-            <button
-              onClick={() => setStatus("ended")}
-              className={`retro rbtn-small text-xs mr-2 sm:mr-4 ${
-                status === "ended" ? "bg-purple-500" : ""
-              }`}
-            >
-              Ended Pools
-            </button>
-            <button className={`retro rbtn-small text-xs mr-2 sm:mr-4`}>
-              <a href="/leaderboard">Leaderboard</a>
-            </button>
-          </div>
-        </div>
 
         {/* Pool cards */}
         <main className="mt-8">
@@ -200,6 +181,9 @@ export default function Home() {
           currentUser={address}
         />
       )}
+
+      {/* Mobile footer filters */}
+      <MobileFooterFilters status={status} setStatus={setStatus} />
     </PageTransition>
   );
 }
