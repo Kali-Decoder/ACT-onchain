@@ -9,6 +9,22 @@ import FarcasterPopup from "@/component/FarcasterPopup";
 import MobileFooterFilters from "@/component/MobileFooterFilters";
 import Image from "next/image";
 
+const poolImages = [
+  "/mock/pool1.jpg",
+  "/mock/pool2.jpg",
+  "/mock/pool3.jpg",
+  "/mock/pool4.jpg",
+  "/mock/pool2.jpg",
+  "/mock/pool6.png",
+  "/mock/pool6.png",
+  "/mock/pool8.png",
+  "/mock/pool9.png",
+  "/mock/pool2.jpg",
+  "/mock/pool3.jpg",
+  "/mock/pool4.jpg",
+];
+
+
 export default function Home() {
   const [showModal, setShowModal] = useState(false);
   const [selectPoolId, setSelectPoolId] = useState<number | null>(null);
@@ -19,7 +35,7 @@ export default function Home() {
 
   // Detect desktop/tablet based on window width
   useEffect(() => {
-    const handleResize = () => setIsDesktop(window.innerWidth >= 640); // md breakpoint
+    const handleResize = () => setIsDesktop(window.innerWidth >= 640);
     handleResize();
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
@@ -58,7 +74,7 @@ export default function Home() {
         <div className="absolute inset-0 bg-black/50" />
       </div>
 
-      <div className="w-full sm:w-[90%] lg:w-[80%] mt-32 sm:mt-28 flex-col mx-auto px-4 sm:px-0">
+      <div className="w-full sm:w-[90%] lg:w-[80%] my-28 flex-col mx-auto px-4 sm:px-0">
         {/* Header */}
         <header className="px-2">
           <h1 className="uppercase py-4">
@@ -73,10 +89,13 @@ export default function Home() {
               <h1 className="uppercase">No Pools Available</h1>
             )}
 
-            {filteredPools.map((pool) => {
+            {filteredPools.map((pool, index) => {
               const entryFee = Number(pool?.entryFee) / 1e18;
               const totalPot = Number(pool?.totalPot) / 1e18;
               const totalEntries = Number(pool?.totalEntries);
+
+              // Assign image based on index
+              const imgSrc = poolImages[index % poolImages.length];
 
               return (
                 <div
@@ -87,6 +106,9 @@ export default function Home() {
                   }}
                   className="bg-gray-900 border border-gray-700 rounded-2xl p-6 shadow hover:shadow-lg cursor-pointer transition-all"
                 >
+                  {/* Card Image */}
+                  
+
                   {/* Logo + Name */}
                   <div className="flex items-start gap-3 mb-4">
                     <div className="min-w-10 min-h-10 w-10 h-10 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center text-white font-bold text-sm">
@@ -95,20 +117,28 @@ export default function Home() {
 
                     <div className="flex flex-col">
                       <h2 className="text-sm font-semibold uppercase text-white flex items-center gap-2">
-                        {pool?.name} ?
+                        {pool?.name}
                       </h2>
                       <p className="text-gray-400 text-xs mt-1 line-clamp-2">
                         {pool?.desc}
                       </p>
                     </div>
                   </div>
-
+<div className="relative w-full h-60 mb-4 rounded-xl overflow-hidden">
+                    <Image
+                      src={imgSrc}
+                      alt={pool?.name || "Pool image"}
+                      fill
+                      className="object-cover hover:scale-105 transition-transform duration-300"
+                    />
+                  </div>
                   {/* Options */}
                   {pool?.options?.length > 0 && (
                     <div className="mb-6">
                       <h3 className="text-xs font-semibold text-gray-300 mb-2">
                         Options:
                       </h3>
+                      
                       <div className="flex flex-wrap gap-2">
                         {pool.options.map((opt, idx) => {
                           const isWinningOption =
@@ -151,19 +181,17 @@ export default function Home() {
                         {totalEntries}
                       </span>
                     </div>
-                    <div className="flex justify-between items-center mb-2">
+                    <div className="flex justify-between items-center">
                       <span className="text-gray-400 text-xs">Status</span>
-                      <span className="text-blue-400 text-xs font-medium">
-                        {Number(pool?.lockTime) < Math.floor(Date.now() / 1000) ? (
-                          <span className="text-red-500 text-xs font-normal">
-                            Ended
-                          </span>
-                        ) : (
-                          <span className="text-green-500 text-xs font-normal">
-                            Live
-                          </span>
-                        )}
-                      </span>
+                      {Number(pool?.lockTime) < Math.floor(Date.now() / 1000) ? (
+                        <span className="text-red-500 text-xs font-normal">
+                          Ended
+                        </span>
+                      ) : (
+                        <span className="text-green-500 text-xs font-normal">
+                          Live
+                        </span>
+                      )}
                     </div>
                   </div>
                 </div>
