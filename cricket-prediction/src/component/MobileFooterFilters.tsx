@@ -42,24 +42,24 @@ export default function MobileFooterFilters({ status, setStatus }: Props) {
           Ended
         </button>
 
-        <a
+        {/* <a
           href="/leaderboard"
           className="flex flex-col items-center text-xs text-gray-400"
         >
           <List className="w-8 h-8 mb-1" />
           Leaderboard
-        </a>
+        </a> */}
       </div>
 
       {/* Floating Right Side Icons (UI only) */}
-      <div className="fixed bottom-22 right-8 flex flex-col gap-4 sm:hidden z-50">
+      {/* <div className="fixed bottom-22 right-8 flex flex-col gap-4 sm:hidden z-50">
         <div className="w-16 h-16 bg-[#0a0f23] border border-gray-700 rounded-2xl flex items-center justify-center shadow-sm">
           <XCircle className="w-8 h-8 text-red-400" />
         </div>
         <div className="w-16 h-16 bg-[#0a0f23] border border-gray-700 rounded-2xl flex items-center justify-center shadow-sm">
           <PlusCircle className="w-8 h-8 text-green-400" />
         </div>
-      </div>
+      </div> */}
     </>
   );
 }

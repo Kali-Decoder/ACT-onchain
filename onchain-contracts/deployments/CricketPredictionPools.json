@@ -1,7 +1,7 @@
 {
   "contractName": "CricketPredictionPools",
-  "address": "0x7f8147725F5F9827e241d1a91319c228EA317E8A",
-  "deployer": "0xe4b286830F35C3C4342952A62372A00b29E7F5EE",
+  "address": "0xFa7A387520b66149196658B81331b3ab55ed0D63",
+  "deployer": "0x347341C36e894073006AdFad0fEB0Ca1F50576a3",
   "abi": [
     {
       "inputs": [
@@ -438,70 +438,6 @@
       "inputs": [
         {
           "internalType": "uint256",
-          "name": "poolId",
-          "type": "uint256"
-        }
-      ],
-      "name": "getPool",
-      "outputs": [
-        {
-          "internalType": "string",
-          "name": "name",
-          "type": "string"
-        },
-        {
-          "internalType": "string",
-          "name": "desc",
-          "type": "string"
-        },
-        {
-          "internalType": "address",
-          "name": "token",
-          "type": "address"
-        },
-        {
-          "internalType": "uint256",
-          "name": "entryFee",
-          "type": "uint256"
-        },
-        {
-          "internalType": "uint64",
-          "name": "startTime",
-          "type": "uint64"
-        },
-        {
-          "internalType": "uint64",
-          "name": "lockTime",
-          "type": "uint64"
-        },
-        {
-          "internalType": "uint16",
-          "name": "platformFeeBps",
-          "type": "uint16"
-        },
-        {
-          "internalType": "string[]",
-          "name": "options",
-          "type": "string[]"
-        },
-        {
-          "internalType": "bool",
-          "name": "resolved",
-          "type": "bool"
-        },
-        {
-          "internalType": "uint256",
-          "name": "winningOption",
-          "type": "uint256"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "uint256",
           "name": "",
           "type": "uint256"
         },
@@ -760,6 +696,29 @@
     {
       "inputs": [],
       "name": "renounceOwnership",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "token",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "to",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        }
+      ],
+      "name": "rescueFunds",
       "outputs": [],
       "stateMutability": "nonpayable",
       "type": "function"

@@ -24,19 +24,19 @@ async function createPool() {
   // prepare parameters
   const now = Math.floor(Date.now() / 1000);
   const startTime = now + 60; // start in 1 min
-  const lockTime = startTime + 60 * 60*10; // lock after 4 hr
-  const entryFee = ethers.parseEther("1"); // 1 ETH
+  const lockTime = startTime + 60 * 60*5;// lock in 12 hours
+  const entryFee = ethers.parseEther("1"); 
   const maxParticipants = 500;
 
   const tx = await contract.createPool(
-    "Who will score most runs",             // match name
+    "How much run will score in first over of ACT Championship ?",             // match name
     "Athena Cricket Tournament",        // description
     ethers.ZeroAddress,       // token (native ETH)
     entryFee,                 // entry fee
     startTime,                // start time
     lockTime,                 // lock time
     maxParticipants,          // max participants
-    ["Nikku", "Harsh","Brooklyn"]            // options
+    ["10", "10+" ,"20+","Under 6"]            // options
   );
 
   console.log("⏳ Tx sent:", tx.hash);

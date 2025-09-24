@@ -1,4 +1,4 @@
-export const DiceManiaAddress="0x0CA0b1FBca251D25b774522407a44Cd3B6Bc3016";
+export const DiceManiaAddress="0xFa7A387520b66149196658B81331b3ab55ed0D63";
 export const DiceManiaABI=[
 	{
 		"inputs": [
