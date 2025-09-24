@@ -9,10 +9,10 @@ import {
   YAxis,
   Tooltip,
   CartesianGrid,
-  Legend,
   ResponsiveContainer,
 } from "recharts";
 import { useBet } from "@/hooks/apiHooks";
+
 const PoolModal = ({ setShowModal, pool, currentUser }) => {
   const { joinPool, isPending, isConfirming, isSuccess, data: joinPoolHash } = useJoinPool();
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
@@ -25,6 +25,7 @@ const PoolModal = ({ setShowModal, pool, currentUser }) => {
   const { claim, isPending: claimPending, isConfirming: claimConfirming, isSuccess: claimSuccess } = useClaim();
   const { counts: optionCounts } = useOptionEntryCounts(pool.id, pool?.options?.length || 0);
   const betMutation = useBet();
+
   useEffect(() => {
     if (!pool) return;
     const updateTimer = () => {
@@ -48,7 +49,6 @@ const PoolModal = ({ setShowModal, pool, currentUser }) => {
   };
 
   if (!pool) return null;
-
   const poolEnded = Number(pool?.lockTime) < Math.floor(Date.now() / 1000);
 
   useEffect(() => {
@@ -82,26 +82,26 @@ const PoolModal = ({ setShowModal, pool, currentUser }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black bg-opacity-70 flex items-center justify-center p-0 sm:p-4">
-      <div className="bg-gray-900  text-white rounded-none sm:rounded-xl p-4 sm:p-10 w-[80vh] h-screen sm:w-full sm:h-auto sm:max-w-5xl sm:max-h-[90vh] overflow-y-auto shadow-2xl relative">
+    <div className="fixed inset-0 z-50 mb-14 bg-black bg-opacity-70 flex items-center justify-center p-2 sm:p-4">
+      <div className="bg-gray-900 text-white rounded-xl p-4 sm:p-8 w-full h-full sm:w-full sm:h-auto sm:max-w-5xl sm:max-h-[90vh] overflow-y-auto shadow-2xl relative">
         {/* Close Button */}
         <button
           onClick={() => setShowModal(false)}
-          className="absolute top-4 right-4 cursor-pointer text-gray-400 hover:text-white text-2xl"
+          className="absolute top-3 right-3 cursor-pointer text-gray-400 hover:text-white text-2xl"
         >
           &times;
         </button>
 
         {/* Title */}
-        <h2 className="text-lg sm:text-xl text-blue-500 font-bold mb-3 sm:mb-6">{pool?.name}</h2>
-        <p className="text-xs font-bold mb-4 sm:mb-6">{pool?.desc}</p>
+        <h2 className="text-base sm:text-xl text-blue-500 font-bold mb-2 sm:mb-4">{pool?.name}</h2>
+        <p className="text-xs sm:text-sm font-medium mb-4 sm:mb-6">{pool?.desc}</p>
 
         {/* Main Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-6">
-          {/* Left Side: Pool & Player Info */}
-          <div className="space-y-3 sm:space-y-4">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+          {/* Left Side */}
+          <div className="space-y-4">
             {/* Pool Details */}
-            <div className="grid grid-cols-2 gap-3 sm:gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-4">
               {[
                 { label: "Pool ID", value: pool?.id },
                 { label: "Entry Fee", value: `${Number(pool?.entryFee) / 1e18} MON` },
@@ -113,38 +113,37 @@ const PoolModal = ({ setShowModal, pool, currentUser }) => {
                 { label: "Winners Count", value: pool?.winnersCount?.toString() },
                 ...(pool?.resolved
                   ? [
-                    {
-                      label: "Winning Option",
-                      value: `${pool?.winningOption}: ${pool?.options?.[pool?.winningOption] || "N/A"}`,
-                    },
-                  ]
+                      {
+                        label: "Winning Option",
+                        value: `${pool?.winningOption}: ${pool?.options?.[pool?.winningOption] || "N/A"}`,
+                      },
+                    ]
                   : []),
               ].map((item, idx) => (
                 <div
                   key={idx}
-                  className="bg-gray-800 p-3 rounded-xl flex flex-col justify-center items-start"
+                  className="bg-gray-800 p-2 sm:p-3 rounded-lg flex flex-col justify-center items-start"
                 >
-                  <span className="text-gray-400 text-xs">{item.label}</span>
-                  <span className="font-semibold text-white mt-1 text-xs break-words">
+                  <span className="text-gray-400 text-[10px] sm:text-xs">{item.label}</span>
+                  <span className="font-semibold text-white mt-1 text-[11px] sm:text-xs break-words">
                     {item.value}
                   </span>
                 </div>
               ))}
             </div>
 
-
             {/* Pot Progress Bar */}
             <div className="p-3 bg-gray-800 rounded-xl">
               <h3 className="text-sm font-semibold mb-2">Total Pot</h3>
-              <div className="w-full bg-gray-700 rounded-full h-3 overflow-hidden">
+              <div className="w-full bg-gray-700 rounded-full h-2 sm:h-3 overflow-hidden">
                 <div
-                  className="bg-green-500 h-3"
+                  className="bg-green-500 h-2 sm:h-3"
                   style={{
                     width: `${Math.min((Number(pool?.netPot) / Number(pool?.totalPot)) * 100, 100)}%`,
                   }}
                 ></div>
               </div>
-              <p className="text-xs mt-2 text-gray-400">
+              <p className="text-[10px] sm:text-xs mt-2 text-gray-400">
                 Net Pot: {Number(pool?.netPot) / 1e18} MON / Total Pot: {Number(pool?.totalPot) / 1e18} MON
               </p>
             </div>
@@ -162,37 +161,36 @@ const PoolModal = ({ setShowModal, pool, currentUser }) => {
             )}
           </div>
 
-          {/* Right Side: Options & Actions */}
-          <div className="flex flex-col justify-between">
-
-            <div className="mt-6">
+          {/* Right Side */}
+          <div className="flex flex-col justify-between mt-4 lg:mt-0">
+            {/* Chart */}
+            <div className="mb-4">
               <h3 className="text-xs font-semibold mb-2 text-center">Option Participation Trend</h3>
-              <ResponsiveContainer width="100%" height={300}>
+              <ResponsiveContainer width="100%" height={200}>
                 <LineChart
                   data={pool?.options?.map((opt: string, idx: number) => ({
                     option: opt,
                     entries: optionCounts[idx] || 0,
                   }))}
-
-                  margin={{ top: 10, right: 20, left: -10, bottom: 0 }}
+                  margin={{ top: 10, right: 10, left: -10, bottom: 0 }}
                 >
                   <CartesianGrid strokeDasharray="3 3" stroke="#444" />
                   <XAxis dataKey="option" tick={{ fill: "#aaa", fontSize: 8 }} />
                   <YAxis tick={{ fill: "#aaa", fontSize: 8 }} />
                   <Tooltip
-                    contentStyle={{ backgroundColor: "black", border: "none", fontSize: "8px" }}
+                    contentStyle={{ backgroundColor: "black", border: "none", fontSize: "10px" }}
                     labelStyle={{ color: "#fff" }}
                   />
-                  {/* <Legend wrapperStyle={{ fontSize: "8px", color: "#fff" }} /> */}
                   <Line type="monotone" dataKey="entries" stroke="#10b981" strokeWidth={1} dot={{ r: 1 }} />
                 </LineChart>
               </ResponsiveContainer>
             </div>
-            {/* Options to Bet */}
+
+            {/* Options */}
             {!poolEnded && !pool?.resolved && (
-              <div className="mb-6 mt-4 p-4">
+              <div className="mb-4">
                 <h3 className="text-sm font-semibold mb-2">Choose Your Option:</h3>
-                <div className="flex flex-wrap gap-2 sm:gap-3">
+                <div className="flex flex-wrap gap-2">
                   {pool?.options?.map((opt, idx) => (
                     <OptionButton
                       key={idx}
@@ -210,9 +208,9 @@ const PoolModal = ({ setShowModal, pool, currentUser }) => {
               </div>
             )}
 
-            {/* Action Buttons */}
-            <div className="flex flex-col items-center gap-2 sm:p-4">
-              {/* Join button */}
+            {/* Actions */}
+            <div className="flex flex-col items-center gap-2">
+              {/* Join */}
               <button
                 onClick={handleJoin}
                 disabled={
@@ -240,7 +238,7 @@ const PoolModal = ({ setShowModal, pool, currentUser }) => {
                       : "Place Bet"}
               </button>
 
-              {/* Resolve button (owner only) */}
+              {/* Resolve (Owner only) */}
               {isOwner && !pool?.resolved && poolEnded && (
                 <div className="mt-2 w-full text-center">
                   <p className="text-xs text-gray-400 mb-1">Resolve Pool:</p>
@@ -250,7 +248,7 @@ const PoolModal = ({ setShowModal, pool, currentUser }) => {
                         key={idx}
                         onClick={() => handleResolve(idx)}
                         disabled={resolvePending || resolveConfirming}
-                        className={`px-4 py-2 whitespace-nowrap rounded-lg cursor-pointer text-xs font-semibold ${resolvePending || resolveConfirming
+                        className={`px-3 py-2 text-[11px] sm:text-xs rounded-lg cursor-pointer font-semibold ${resolvePending || resolveConfirming
                           ? "opacity-50 cursor-not-allowed bg-gray-600"
                           : "bg-red-600 hover:bg-red-500 text-white"
                           }`}
@@ -262,7 +260,7 @@ const PoolModal = ({ setShowModal, pool, currentUser }) => {
                 </div>
               )}
 
-              {/* Claim button (player winner) */}
+              {/* Claim */}
               {pool?.resolved &&
                 playerData?.hasJoined &&
                 !playerData?.claimed &&
@@ -270,7 +268,7 @@ const PoolModal = ({ setShowModal, pool, currentUser }) => {
                   <button
                     onClick={() => handleClaim(pool.id)}
                     disabled={claimPending || claimConfirming}
-                    className={`px-4 cursor-pointer py-2 rounded-lg text-xs font-semibold mt-2 ${claimPending || claimConfirming
+                    className={`px-4 py-2 rounded-lg text-xs font-semibold mt-2 ${claimPending || claimConfirming
                       ? "opacity-50 cursor-not-allowed bg-gray-600"
                       : "bg-green-600 hover:bg-green-500 text-white"
                       }`}
@@ -278,13 +276,11 @@ const PoolModal = ({ setShowModal, pool, currentUser }) => {
                     {claimPending || claimConfirming ? "Claiming..." : "Claim Winnings 🎉"}
                   </button>
                 )}
-
             </div>
 
-
-            {/* Has Joined Message */}
+            {/* Status */}
             {isLoading && (
-              <p className="text-gray-400 text-center mt-2">Checking participation...</p>
+              <p className="text-gray-400 text-center mt-2 text-xs">Checking participation...</p>
             )}
             {!isLoading && hasJoined && (
               <p className="text-yellow-400 text-center mt-2 text-xs font-semibold">
